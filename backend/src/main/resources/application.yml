@@ -24,6 +24,10 @@ server:
   port: 8080
   servlet:
     context-path: /
+  
+# 时区配置
+spring.jackson:
+  time-zone: Asia/Shanghai
 
 logging:
   level:
