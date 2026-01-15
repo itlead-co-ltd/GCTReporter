@@ -1,0 +1,95 @@
+# GCT Reporter - Git Ignore File
+
+### Java / Maven ###
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.log
+*.tmp
+
+# Maven
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.properties
+
+### Spring Boot ###
+*.pid
+*.gz
+spring.log
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+### Eclipse ###
+.classpath
+.project
+.settings/
+bin/
+
+### VS Code ###
+.vscode/
+*.code-workspace
+
+### Node.js / Vue ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Vue build output
+dist/
+dist-ssr/
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+### Database ###
+*.db
+*.sqlite
+*.sqlite3
+
+### OS ###
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+### Logs ###
+logs/
+*.log
+
+### Test Coverage ###
+coverage/
+.nyc_output/
+htmlcov/
+.coverage
+.pytest_cache/
+
+### Sensitive Files ###
+application-prod.yml
+application-prod.properties
+*.key
+*.pem
+*.p12
+*.jks
+
+### Backup Files ###
+*.bak
+*.swp
+*~
+.#*
+
+### Build Tools ###
+.gradle/
+build/

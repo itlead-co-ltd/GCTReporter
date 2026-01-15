@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建报表 - Step 1-2 - 程序员报表生成工具</title>
+    <style>
+        /* ========== CSS变量定义 ========== */
+        :root {
+            --primary-color: #409EFF;
+            --success-color: #67C23A;
+            --warning-color: #E6A23C;
+            --danger-color: #F56C6C;
+            --info-color: #909399;
+            --border-radius: 4px;
+            --box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+        
+        /* ========== 全局样式 ========== */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            color: #303133;
+            background-color: #f0f2f5;
+            line-height: 1.5;
+        }
+        
+        /* ========== 布局容器 ========== */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-lg);
+        }
+        
+        /* ========== 页面头部 ========== */
+        .page-header {
+            background: white;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .breadcrumb {
+            color: #909399;
+            font-size: 14px;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            color: #66b1ff;
+        }
+        
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #303133;
+        }
+        
+        /* ========== 步骤条样式 ========== */
+        .steps-container {
+            background: white;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .step-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        
+        .step-item::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background: #e4e7ed;
+            z-index: 0;
+        }
+        
+        .step-item:last-child::before {
+            display: none;
+        }
+        
+        .step-item.completed::before {
+            background: var(--success-color);
+        }
+        
+        .step-item.active::before {
+            background: linear-gradient(to right, var(--success-color) 50%, #e4e7ed 50%);
+        }
+        
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e4e7ed;
+            color: #909399;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s;
+        }
+        
+        .step-item.completed .step-icon {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .step-item.active .step-icon {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.2);
+        }
+        
+        .step-title {
+            margin-top: var(--spacing-sm);
+            font-size: 14px;
+            color: #909399;
+        }
+        
+        .step-item.active .step-title {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .step-item.completed .step-title {
+            color: #303133;
+        }
+        
+        /* ========== 表单容器 ========== */
+        .form-container {
+            background: white;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
+            color: #606266;
+        }
+        
+        .form-label.required::before {
+            content: '* ';
+            color: var(--danger-color);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .form-input.error {
+            border-color: var(--danger-color);
+        }
+        
+        .form-input.success {
+            border-color: var(--success-color);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-help {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #909399;
+        }
+        
+        .form-error {
+            margin-top: 4px;
+            font-size: 12px;
+            color: var(--danger-color);
+            display: none;
+        }
+        
+        .form-error.show {
+            display: block;
+        }
+        
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #909399;
+            margin-top: 4px;
+        }
+        
+        .char-counter.warning {
+            color: var(--warning-color);
+        }
+        
+        /* ========== SQL编辑器样式 ========== */
+        .sql-editor-container {
+            position: relative;
+        }
+        
+        .sql-editor-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .sql-editor {
+            width: 100%;
+            min-height: 300px;
+            padding: 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: var(--border-radius);
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            background: #f5f7fa;
+            color: #303133;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        
+        .sql-editor:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+        }
+        
+        .sql-keyword {
+            color: #c678dd;
+            font-weight: 600;
+        }
+        
+        .sql-param {
+            color: #e06c75;
+        }
+        
+        /* ========== 按钮样式 ========== */
+        .btn {
+            padding: 9px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #66b1ff;
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #85ce61;
+        }
+        
+        .btn-default {
+            background: white;
+            color: #606266;
+            border: 1px solid #DCDFE6;
+        }
+        
+        .btn-default:hover:not(:disabled) {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background: #ecf5ff;
+        }
+        
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+        }
+        
+        .btn-info:hover:not(:disabled) {
+            background: #a6a9ad;
+        }
+        
+        .btn-loading::before {
+            content: '⏳ ';
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* ========== 操作按钮区域 ========== */
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid #EBEEF5;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* ========== Toast提示 ========== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease;
+        }
+        
+        .toast-success { background: var(--success-color); }
+        .toast-error { background: var(--danger-color); }
+        .toast-warning { background: var(--warning-color); }
+        .toast-info { background: var(--info-color); }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+        
+        /* ========== 提示框样式 ========== */
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .alert-info {
+            background: #ecf5ff;
+            color: #409eff;
+            border: 1px solid #b3d8ff;
+        }
+        
+        .alert-success {
+            background: #f0f9ff;
+            color: #67c23a;
+            border: 1px solid #b3e19d;
+        }
+        
+        .alert-error {
+            background: #fef0f0;
+            color: #f56c6c;
+            border: 1px solid #fbc4c4;
+        }
+        
+        /* ========== 参数提取结果 ========== */
+        .param-list {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: #f5f7fa;
+            border-radius: var(--border-radius);
+        }
+        
+        .param-item {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 4px;
+            background: white;
+            border: 1px solid #DCDFE6;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #606266;
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== 应用容器 ========== -->
+    <div class="app-container">
+        
+        <!-- ========== 页面头部 ========== -->
+        <div class="page-header">
+            <div class="breadcrumb">
+                <a href="report-list.html">📊 报表列表</a> / 创建报表
+            </div>
+            <h1 class="page-title">创建新报表</h1>
+        </div>
+        
+        <!-- ========== 步骤条 ========== -->
+        <div class="steps-container">
+            <div class="steps">
+                <div class="step-item active" data-step="1">
+                    <div class="step-icon">1</div>
+                    <div class="step-title">基本信息</div>
+                </div>
+                <div class="step-item" data-step="2">
+                    <div class="step-icon">2</div>
+                    <div class="step-title">SQL编辑</div>
+                </div>
+                <div class="step-item" data-step="3">
+                    <div class="step-icon">3</div>
+                    <div class="step-title">参数配置</div>
+                </div>
+                <div class="step-item" data-step="4">
+                    <div class="step-icon">4</div>
+                    <div class="step-title">列配置</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========== 表单容器 ========== -->
+        <div class="form-container">
+            
+            <!-- ========== Step 1: 基本信息 ========== -->
+            <div class="form-step active" id="step1">
+                <h2 style="margin-bottom: 24px; font-size: 18px;">📝 Step 1: 基本信息配置</h2>
+                
+                <div class="form-group">
+                    <label class="form-label required">报表名称</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="reportName"
+                        placeholder="请输入报表名称（2-50个字符）"
+                        maxlength="50"
+                    >
+                    <div class="form-error" id="reportNameError"></div>
+                    <div class="char-counter" id="reportNameCounter">0 / 50</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">报表描述</label>
+                    <textarea 
+                        class="form-input form-textarea" 
+                        id="reportDesc"
+                        placeholder="请输入报表描述，说明报表的用途和业务场景（选填，最多500字符）"
+                        maxlength="500"
+                    ></textarea>
+                    <div class="form-help">描述报表的用途、数据来源和使用场景</div>
+                    <div class="char-counter" id="reportDescCounter">0 / 500</div>
+                </div>
+            </div>
+            
+            <!-- ========== Step 2: SQL编辑 ========== -->
+            <div class="form-step" id="step2">
+                <h2 style="margin-bottom: 24px; font-size: 18px;">💻 Step 2: SQL查询语句</h2>
+                
+                <div class="alert alert-info">
+                    <span>ℹ️</span>
+                    <div>
+                        <strong>SQL编写说明：</strong><br>
+                        1. 仅支持 SELECT 查询语句<br>
+                        2. 参数使用 <code>:paramName</code> 格式，如 <code>WHERE created_at >= :startDate</code><br>
+                        3. 字符数限制：1-10000字符<br>
+                        4. 保存前必须测试执行成功
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="sql-editor-toolbar">
+                        <label class="form-label required" style="margin-bottom: 0;">SQL查询语句</label>
+                        <div>
+                            <button class="btn btn-success" id="testExecuteBtn">
+                                ▶️ 测试执行
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <textarea 
+                        class="form-input sql-editor" 
+                        id="sqlContent"
+                        placeholder="-- 请输入SELECT查询语句&#10;-- 示例：&#10;SELECT &#10;    user_id,&#10;    username,&#10;    created_at&#10;FROM users&#10;WHERE created_at >= :startDate&#10;  AND created_at <= :endDate&#10;ORDER BY created_at DESC&#10;LIMIT 100;"
+                    ></textarea>
+                    <div class="form-error" id="sqlContentError"></div>
+                    <div class="char-counter" id="sqlContentCounter">0 / 10000</div>
+                </div>
+                
+                <!-- 测试执行结果 -->
+                <div id="testResultContainer" style="display: none;"></div>
+                
+                <!-- 参数提取结果 -->
+                <div id="paramExtractContainer" style="display: none;">
+                    <div class="alert alert-success">
+                        <span>✅</span>
+                        <div>
+                            <strong>已检测到参数占位符：</strong>
+                            <div class="param-list" id="paramList"></div>
+                            这些参数将在Step 3中进行配置
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ========== 操作按钮区域 ========== -->
+            <div class="form-footer">
+                <div>
+                    <button class="btn btn-default" id="cancelBtn">
+                        ❌ 取消
+                    </button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-info" id="saveDraftBtn">
+                        💾 保存草稿
+                    </button>
+                    <button class="btn btn-default" id="prevBtn" style="display: none;">
+                        ← 上一步
+                    </button>
+                    <button class="btn btn-primary" id="nextBtn">
+                        下一步 →
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- ========== Toast容器 ========== -->
+    <div id="toastContainer"></div>
+    
+    <script>
+        // ========================================
+        // 全局状态管理
+        // ========================================
+        
+        let currentStep = 1;
+        let reportData = {
+            reportName: '',
+            reportDesc: '',
+            sqlContent: '',
+            params: [],
+            testExecuted: false
+        };
+        
+        // 从localStorage加载草稿
+        const draftData = localStorage.getItem('reportDraft');
+        if (draftData) {
+            reportData = JSON.parse(draftData);
+            showToast('已恢复草稿数据', 'info');
+        }
+        
+        // ========================================
+        // 工具函数
+        // ========================================
+        
+        /**
+         * 显示Toast提示
+         */
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icon = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            }[type] || 'ℹ️';
+            
+            toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'fadeIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
+        /**
+         * 保存草稿到localStorage
+         */
+        function saveDraft() {
+            localStorage.setItem('reportDraft', JSON.stringify(reportData));
+        }
+        
+        /**
+         * 防抖函数
+         */
+        function debounce(fn, delay) {
+            let timer = null;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+        
+        // ========================================
+        // 步骤切换函数
+        // ========================================
+        
+        /**
+         * 切换到指定步骤
+         */
+        function switchStep(step) {
+            // 隐藏所有步骤
+            document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.step-item').forEach(el => {
+                el.classList.remove('active', 'completed');
+            });
+            
+            // 显示当前步骤
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            // 更新步骤条状态
+            document.querySelectorAll('.step-item').forEach((el, index) => {
+                const stepNum = index + 1;
+                if (stepNum < step) {
+                    el.classList.add('completed');
+                    el.querySelector('.step-icon').textContent = '✓';
+                } else if (stepNum === step) {
+                    el.classList.add('active');
+                    el.querySelector('.step-icon').textContent = stepNum;
+                } else {
+                    el.querySelector('.step-icon').textContent = stepNum;
+                }
+            });
+            
+            // 更新按钮显示
+            document.getElementById('prevBtn').style.display = step > 1 ? 'inline-flex' : 'none';
+            
+            currentStep = step;
+            
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // ========================================
+        // 表单验证函数
+        // ========================================
+        
+        /**
+         * 验证Step 1
+         */
+        function validateStep1() {
+            const reportName = document.getElementById('reportName').value.trim();
+            const reportNameError = document.getElementById('reportNameError');
+            const reportNameInput = document.getElementById('reportName');
+            
+            if (!reportName) {
+                reportNameError.textContent = '报表名称不能为空';
+                reportNameError.classList.add('show');
+                reportNameInput.classList.add('error');
+                return false;
+            }
+            
+            if (reportName.length < 2) {
+                reportNameError.textContent = '报表名称至少2个字符';
+                reportNameError.classList.add('show');
+                reportNameInput.classList.add('error');
+                return false;
+            }
+            
+            reportNameError.classList.remove('show');
+            reportNameInput.classList.remove('error');
+            reportNameInput.classList.add('success');
+            
+            reportData.reportName = reportName;
+            reportData.reportDesc = document.getElementById('reportDesc').value.trim();
+            
+            return true;
+        }
+        
+        /**
+         * 验证Step 2
+         */
+        function validateStep2() {
+            const sqlContent = document.getElementById('sqlContent').value.trim();
+            const sqlContentError = document.getElementById('sqlContentError');
+            const sqlContentInput = document.getElementById('sqlContent');
+            
+            if (!sqlContent) {
+                sqlContentError.textContent = 'SQL查询语句不能为空';
+                sqlContentError.classList.add('show');
+                sqlContentInput.classList.add('error');
+                return false;
+            }
+            
+            if (!sqlContent.toUpperCase().includes('SELECT')) {
+                sqlContentError.textContent = '仅支持SELECT查询语句';
+                sqlContentError.classList.add('show');
+                sqlContentInput.classList.add('error');
+                return false;
+            }
+            
+            if (!reportData.testExecuted) {
+                sqlContentError.textContent = '请先测试执行SQL';
+                sqlContentError.classList.add('show');
+                sqlContentInput.classList.add('error');
+                showToast('保存前必须测试执行成功', 'warning');
+                return false;
+            }
+            
+            sqlContentError.classList.remove('show');
+            sqlContentInput.classList.remove('error');
+            sqlContentInput.classList.add('success');
+            
+            reportData.sqlContent = sqlContent;
+            
+            return true;
+        }
+        
+        // ========================================
+        // SQL相关函数
+        // ========================================
+        
+        /**
+         * 提取SQL中的参数
+         */
+        function extractParams(sql) {
+            const regex = /:([a-zA-Z_][a-zA-Z0-9_]*)/g;
+            const params = new Set();
+            let match;
+            
+            while ((match = regex.exec(sql)) !== null) {
+                params.add(match[1]);
+            }
+            
+            return Array.from(params);
+        }
+        
+        /**
+         * 测试执行SQL
+         */
+        function testExecuteSQL() {
+            const sqlContent = document.getElementById('sqlContent').value.trim();
+            
+            if (!sqlContent) {
+                showToast('请先输入SQL查询语句', 'warning');
+                return;
+            }
+            
+            if (!sqlContent.toUpperCase().includes('SELECT')) {
+                showToast('仅支持SELECT查询语句', 'error');
+                return;
+            }
+            
+            const testBtn = document.getElementById('testExecuteBtn');
+            testBtn.disabled = true;
+            testBtn.classList.add('btn-loading');
+            testBtn.textContent = '执行中...';
+            
+            // 模拟测试执行
+            setTimeout(() => {
+                const success = Math.random() > 0.3; // 70%成功率
+                const resultContainer = document.getElementById('testResultContainer');
+                
+                if (success) {
+                    // 提取参数
+                    const params = extractParams(sqlContent);
+                    reportData.params = params;
+                    reportData.testExecuted = true;
+                    
+                    resultContainer.innerHTML = `
+                        <div class="alert alert-success">
+                            <span>✅</span>
+                            <div>
+                                <strong>测试执行成功</strong><br>
+                                执行时间: 1.23秒 | 结果行数: 42行（预览前100行）
+                            </div>
+                        </div>
+                    `;
+                    resultContainer.style.display = 'block';
+                    
+                    // 显示参数提取结果
+                    if (params.length > 0) {
+                        const paramContainer = document.getElementById('paramExtractContainer');
+                        const paramList = document.getElementById('paramList');
+                        paramList.innerHTML = params.map(p => 
+                            `<span class="param-item">:${p}</span>`
+                        ).join('');
+                        paramContainer.style.display = 'block';
+                    } else {
+                        document.getElementById('paramExtractContainer').style.display = 'none';
+                    }
+                    
+                    showToast('SQL测试执行成功', 'success');
+                    document.getElementById('sqlContent').classList.add('success');
+                } else {
+                    resultContainer.innerHTML = `
+                        <div class="alert alert-error">
+                            <span>❌</span>
+                            <div>
+                                <strong>SQL执行失败</strong><br>
+                                错误信息: Table 'users' doesn't exist (示例错误)
+                            </div>
+                        </div>
+                    `;
+                    resultContainer.style.display = 'block';
+                    showToast('SQL执行失败，请检查语法', 'error');
+                }
+                
+                testBtn.disabled = false;
+                testBtn.classList.remove('btn-loading');
+                testBtn.textContent = '▶️ 测试执行';
+            }, 2000);
+        }
+        
+        // ========================================
+        // 事件处理函数
+        // ========================================
+        
+        /**
+         * 下一步
+         */
+        function handleNext() {
+            if (currentStep === 1) {
+                if (validateStep1()) {
+                    saveDraft();
+                    switchStep(2);
+                }
+            } else if (currentStep === 2) {
+                if (validateStep2()) {
+                    saveDraft();
+                    showToast('即将跳转到Step 3-4页面...', 'info');
+                    setTimeout(() => {
+                        window.location.href = 'report-create-step3-4.html';
+                    }, 1500);
+                }
+            }
+        }
+        
+        /**
+         * 上一步
+         */
+        function handlePrev() {
+            if (currentStep > 1) {
+                switchStep(currentStep - 1);
+            }
+        }
+        
+        /**
+         * 保存草稿
+         */
+        function handleSaveDraft() {
+            if (currentStep === 1) {
+                reportData.reportName = document.getElementById('reportName').value.trim();
+                reportData.reportDesc = document.getElementById('reportDesc').value.trim();
+            } else if (currentStep === 2) {
+                reportData.sqlContent = document.getElementById('sqlContent').value.trim();
+            }
+            
+            saveDraft();
+            showToast('草稿已保存', 'success');
+        }
+        
+        /**
+         * 取消
+         */
+        function handleCancel() {
+            if (confirm('确定要取消创建报表吗？未保存的数据将丢失。')) {
+                localStorage.removeItem('reportDraft');
+                window.location.href = 'report-list.html';
+            }
+        }
+        
+        // ========================================
+        // 字符计数
+        // ========================================
+        
+        /**
+         * 更新字符计数
+         */
+        function updateCharCounter(inputId, counterId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            const length = input.value.length;
+            
+            counter.textContent = `${length} / ${maxLength}`;
+            
+            if (length > maxLength * 0.9) {
+                counter.classList.add('warning');
+            } else {
+                counter.classList.remove('warning');
+            }
+        }
+        
+        // ========================================
+        // 页面初始化
+        // ========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 恢复草稿数据
+            if (reportData.reportName) {
+                document.getElementById('reportName').value = reportData.reportName;
+                updateCharCounter('reportName', 'reportNameCounter', 50);
+            }
+            
+            if (reportData.reportDesc) {
+                document.getElementById('reportDesc').value = reportData.reportDesc;
+                updateCharCounter('reportDesc', 'reportDescCounter', 500);
+            }
+            
+            if (reportData.sqlContent) {
+                document.getElementById('sqlContent').value = reportData.sqlContent;
+                updateCharCounter('sqlContent', 'sqlContentCounter', 10000);
+            }
+            
+            // 绑定事件
+            document.getElementById('reportName').addEventListener('input', function() {
+                updateCharCounter('reportName', 'reportNameCounter', 50);
+                this.classList.remove('error', 'success');
+                document.getElementById('reportNameError').classList.remove('show');
+            });
+            
+            document.getElementById('reportDesc').addEventListener('input', function() {
+                updateCharCounter('reportDesc', 'reportDescCounter', 500);
+            });
+            
+            document.getElementById('sqlContent').addEventListener('input', function() {
+                updateCharCounter('sqlContent', 'sqlContentCounter', 10000);
+                this.classList.remove('error', 'success');
+                document.getElementById('sqlContentError').classList.remove('show');
+                reportData.testExecuted = false;
+                document.getElementById('testResultContainer').style.display = 'none';
+                document.getElementById('paramExtractContainer').style.display = 'none';
+            });
+            
+            document.getElementById('testExecuteBtn').addEventListener('click', testExecuteSQL);
+            document.getElementById('nextBtn').addEventListener('click', handleNext);
+            document.getElementById('prevBtn').addEventListener('click', handlePrev);
+            document.getElementById('saveDraftBtn').addEventListener('click', handleSaveDraft);
+            document.getElementById('cancelBtn').addEventListener('click', handleCancel);
+            
+            // 自动保存草稿（每30秒）
+            setInterval(() => {
+                if (currentStep === 1) {
+                    reportData.reportName = document.getElementById('reportName').value.trim();
+                    reportData.reportDesc = document.getElementById('reportDesc').value.trim();
+                } else if (currentStep === 2) {
+                    reportData.sqlContent = document.getElementById('sqlContent').value.trim();
+                }
+                saveDraft();
+            }, 30000);
+            
+            // 快捷键支持
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+S 保存草稿
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    handleSaveDraft();
+                }
+                
+                // Ctrl+Enter 测试执行（Step 2）
+                if (currentStep === 2 && e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    testExecuteSQL();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

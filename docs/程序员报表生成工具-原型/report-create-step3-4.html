@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建报表 - Step 3-4 - 程序员报表生成工具</title>
+    <style>
+        /* ========== CSS变量定义 ========== */
+        :root {
+            --primary-color: #409EFF;
+            --success-color: #67C23A;
+            --warning-color: #E6A23C;
+            --danger-color: #F56C6C;
+            --info-color: #909399;
+            --border-radius: 4px;
+            --box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+        
+        /* ========== 全局样式 ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            color: #303133;
+            background-color: #f0f2f5;
+            line-height: 1.5;
+        }
+        
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-lg);
+        }
+        
+        /* ========== 页面头部 ========== */
+        .page-header {
+            background: white;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .breadcrumb {
+            color: #909399;
+            font-size: 14px;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #303133;
+        }
+        
+        /* ========== 步骤条样式 ========== */
+        .steps-container {
+            background: white;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .step-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        
+        .step-item::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background: #e4e7ed;
+            z-index: 0;
+        }
+        
+        .step-item:last-child::before {
+            display: none;
+        }
+        
+        .step-item.completed::before {
+            background: var(--success-color);
+        }
+        
+        .step-item.active::before {
+            background: linear-gradient(to right, var(--success-color) 50%, #e4e7ed 50%);
+        }
+        
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e4e7ed;
+            color: #909399;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s;
+        }
+        
+        .step-item.completed .step-icon {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .step-item.active .step-icon {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.2);
+        }
+        
+        .step-title {
+            margin-top: var(--spacing-sm);
+            font-size: 14px;
+            color: #909399;
+        }
+        
+        .step-item.active .step-title {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .step-item.completed .step-title {
+            color: #303133;
+        }
+        
+        /* ========== 表单容器 ========== */
+        .form-container {
+            background: white;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ========== 表格样式 ========== */
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: var(--spacing-md);
+        }
+        
+        .config-table thead {
+            background: #fafafa;
+        }
+        
+        .config-table th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #606266;
+            border: 1px solid #EBEEF5;
+            font-size: 13px;
+        }
+        
+        .config-table td {
+            padding: 8px;
+            border: 1px solid #EBEEF5;
+        }
+        
+        .config-table tbody tr:hover {
+            background: #f5f7fa;
+        }
+        
+        .config-table input[type="text"],
+        .config-table input[type="number"],
+        .config-table select,
+        .config-table textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #DCDFE6;
+            border-radius: 3px;
+            font-size: 13px;
+            transition: border-color 0.2s;
+        }
+        
+        .config-table input:focus,
+        .config-table select:focus,
+        .config-table textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .config-table input.error {
+            border-color: var(--danger-color);
+        }
+        
+        /* ========== 按钮样式 ========== */
+        .btn {
+            padding: 9px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #66b1ff;
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #85ce61;
+        }
+        
+        .btn-default {
+            background: white;
+            color: #606266;
+            border: 1px solid #DCDFE6;
+        }
+        
+        .btn-default:hover:not(:disabled) {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background: #ecf5ff;
+        }
+        
+        .btn-text {
+            background: transparent;
+            color: var(--primary-color);
+            padding: 4px 8px;
+            font-size: 13px;
+        }
+        
+        .btn-text:hover:not(:disabled) {
+            background: #ecf5ff;
+        }
+        
+        .btn-text.btn-danger {
+            color: var(--danger-color);
+        }
+        
+        .btn-text.btn-danger:hover:not(:disabled) {
+            background: #fef0f0;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        /* ========== 开关样式 ========== */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #dcdfe6;
+            transition: 0.2s;
+            border-radius: 20px;
+        }
+        
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.2s;
+            border-radius: 50%;
+        }
+        
+        .switch input:checked + .switch-slider {
+            background-color: var(--primary-color);
+        }
+        
+        .switch input:checked + .switch-slider:before {
+            transform: translateX(20px);
+        }
+        
+        /* ========== 复选框样式 ========== */
+        .checkbox {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .checkbox input[type="checkbox"] {
+            margin-right: 4px;
+            cursor: pointer;
+        }
+        
+        /* ========== 提示框样式 ========== */
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .alert-info {
+            background: #ecf5ff;
+            color: #409eff;
+            border: 1px solid #b3d8ff;
+        }
+        
+        .alert-warning {
+            background: #fdf6ec;
+            color: #e6a23c;
+            border: 1px solid #f5dab1;
+        }
+        
+        /* ========== Toast提示 ========== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease;
+        }
+        
+        .toast-success { background: var(--success-color); }
+        .toast-error { background: var(--danger-color); }
+        .toast-warning { background: var(--warning-color); }
+        .toast-info { background: var(--info-color); }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+        
+        /* ========== 操作按钮区域 ========== */
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid #EBEEF5;
+            margin-top: var(--spacing-lg);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* ========== 工具栏 ========== */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .toolbar-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== 应用容器 ========== -->
+    <div class="app-container">
+        
+        <!-- ========== 页面头部 ========== -->
+        <div class="page-header">
+            <div class="breadcrumb">
+                <a href="report-list.html">📊 报表列表</a> / <a href="report-create-step1-2.html">创建报表</a> / Step 3-4
+            </div>
+            <h1 class="page-title">创建新报表 - 参数与列配置</h1>
+        </div>
+        
+        <!-- ========== 步骤条 ========== -->
+        <div class="steps-container">
+            <div class="steps">
+                <div class="step-item completed" data-step="1">
+                    <div class="step-icon">✓</div>
+                    <div class="step-title">基本信息</div>
+                </div>
+                <div class="step-item completed" data-step="2">
+                    <div class="step-icon">✓</div>
+                    <div class="step-title">SQL编辑</div>
+                </div>
+                <div class="step-item active" data-step="3">
+                    <div class="step-icon">3</div>
+                    <div class="step-title">参数配置</div>
+                </div>
+                <div class="step-item" data-step="4">
+                    <div class="step-icon">4</div>
+                    <div class="step-title">列配置</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========== 表单容器 ========== -->
+        <div class="form-container">
+            
+            <!-- ========== Step 3: 参数配置 ========== -->
+            <div class="form-step active" id="step3">
+                <div class="toolbar">
+                    <h2 class="toolbar-title">⚙️ Step 3: 参数配置</h2>
+                    <button class="btn btn-primary btn-small" id="addParamBtn">
+                        ➕ 添加参数
+                    </button>
+                </div>
+                
+                <div class="alert alert-info">
+                    <span>ℹ️</span>
+                    <div>
+                        <strong>参数配置说明：</strong><br>
+                        1. SQL中检测到 <strong id="detectedParamsCount">0</strong> 个参数占位符<br>
+                        2. 参数名必须与SQL中的占位符匹配（如 :startDate）<br>
+                        3. 最多支持20个参数<br>
+                        4. 参数类型：STRING（文本）、NUMBER（数字）、DATE（日期）、DATETIME（日期时间）
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="config-table" id="paramTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 120px;">参数名 <span style="color: red;">*</span></th>
+                                <th style="width: 120px;">参数类型 <span style="color: red;">*</span></th>
+                                <th style="width: 150px;">默认值</th>
+                                <th style="width: 80px;">必填</th>
+                                <th style="width: 200px;">参数说明</th>
+                                <th style="width: 100px;">排序</th>
+                                <th style="width: 80px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paramTableBody">
+                            <!-- 动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="emptyParamHint" style="text-align: center; padding: 40px 0; color: #909399;">
+                    暂无参数配置，点击"添加参数"按钮开始配置
+                </div>
+            </div>
+            
+            <!-- ========== Step 4: 列配置 ========== -->
+            <div class="form-step" id="step4">
+                <div class="toolbar">
+                    <h2 class="toolbar-title">📋 Step 4: 列配置</h2>
+                    <div class="btn-group">
+                        <button class="btn btn-default btn-small" id="showAllBtn">
+                            👁️ 全部显示
+                        </button>
+                        <button class="btn btn-default btn-small" id="hideAllBtn">
+                            🙈 全部隐藏
+                        </button>
+                        <button class="btn btn-primary btn-small" id="extractColumnsBtn">
+                            🔄 自动提取列信息
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <span>ℹ️</span>
+                    <div>
+                        <strong>列配置说明：</strong><br>
+                        1. 点击"自动提取列信息"从SQL执行结果中提取列信息<br>
+                        2. 配置每列的显示名称、列宽、格式化类型和显示状态<br>
+                        3. 格式化类型：DEFAULT（原始值）、DATE（日期格式）、NUMBER（数字格式）、CURRENCY（货币格式）
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="config-table" id="columnTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 120px;">字段名</th>
+                                <th style="width: 150px;">显示名称 <span style="color: red;">*</span></th>
+                                <th style="width: 100px;">列宽(px)</th>
+                                <th style="width: 120px;">格式化类型</th>
+                                <th style="width: 80px;">显示/隐藏</th>
+                                <th style="width: 100px;">排序</th>
+                            </tr>
+                        </thead>
+                        <tbody id="columnTableBody">
+                            <!-- 动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="emptyColumnHint" style="text-align: center; padding: 40px 0; color: #909399;">
+                    点击"自动提取列信息"按钮从SQL执行结果中提取列信息
+                </div>
+            </div>
+            
+            <!-- ========== 操作按钮区域 ========== -->
+            <div class="form-footer">
+                <div>
+                    <button class="btn btn-default" id="backToStep2Btn">
+                        ← 返回Step 2
+                    </button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-default" id="prevBtn" style="display: none;">
+                        ← 上一步
+                    </button>
+                    <button class="btn btn-primary" id="nextBtn">
+                        下一步 →
+                    </button>
+                    <button class="btn btn-success" id="saveReportBtn" style="display: none;">
+                        💾 保存报表
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- ========== Toast容器 ========== -->
+    <div id="toastContainer"></div>
+    
+    <script>
+        // ========================================
+        // 全局状态管理
+        // ========================================
+        
+        let currentStep = 3;
+        let reportData = {
+            reportName: '',
+            reportDesc: '',
+            sqlContent: '',
+            params: [],
+            columns: []
+        };
+        
+        // 从localStorage加载草稿
+        const draftData = localStorage.getItem('reportDraft');
+        if (draftData) {
+            reportData = JSON.parse(draftData);
+        }
+        
+        // 模拟从SQL中提取的参数
+        const detectedParams = ['startDate', 'endDate', 'status'];
+        
+        // ========================================
+        // 工具函数
+        // ========================================
+        
+        /**
+         * 显示Toast提示
+         */
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icon = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            }[type] || 'ℹ️';
+            
+            toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'fadeIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
+        /**
+         * 保存草稿到localStorage
+         */
+        function saveDraft() {
+            localStorage.setItem('reportDraft', JSON.stringify(reportData));
+        }
+        
+        /**
+         * 生成唯一ID
+         */
+        function generateId() {
+            return Date.now() + Math.random();
+        }
+        
+        // ========================================
+        // 步骤切换函数
+        // ========================================
+        
+        /**
+         * 切换到指定步骤
+         */
+        function switchStep(step) {
+            document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.step-item').forEach(el => {
+                el.classList.remove('active', 'completed');
+            });
+            
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            document.querySelectorAll('.step-item').forEach((el, index) => {
+                const stepNum = index + 1;
+                if (stepNum < step) {
+                    el.classList.add('completed');
+                    el.querySelector('.step-icon').textContent = '✓';
+                } else if (stepNum === step) {
+                    el.classList.add('active');
+                    el.querySelector('.step-icon').textContent = stepNum;
+                } else {
+                    el.querySelector('.step-icon').textContent = stepNum;
+                }
+            });
+            
+            // 更新按钮显示
+            document.getElementById('prevBtn').style.display = step === 4 ? 'inline-flex' : 'none';
+            document.getElementById('nextBtn').style.display = step === 3 ? 'inline-flex' : 'none';
+            document.getElementById('saveReportBtn').style.display = step === 4 ? 'inline-flex' : 'none';
+            
+            currentStep = step;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // ========================================
+        // 参数配置函数
+        // ========================================
+        
+        /**
+         * 添加参数行
+         */
+        function addParam(paramName = '', paramType = 'STRING', defaultValue = '', isRequired = false, desc = '') {
+            if (reportData.params.length >= 20) {
+                showToast('参数数量不能超过20个', 'warning');
+                return;
+            }
+            
+            const param = {
+                id: generateId(),
+                paramName,
+                paramType,
+                defaultValue,
+                isRequired,
+                desc,
+                sortOrder: reportData.params.length
+            };
+            
+            reportData.params.push(param);
+            renderParamTable();
+            saveDraft();
+            
+            if (paramName) {
+                showToast(`已添加参数: ${paramName}`, 'success', 2000);
+            }
+        }
+        
+        /**
+         * 删除参数
+         */
+        function deleteParam(id) {
+            if (confirm('确定要删除此参数吗？')) {
+                reportData.params = reportData.params.filter(p => p.id !== id);
+                renderParamTable();
+                saveDraft();
+                showToast('参数已删除', 'success');
+            }
+        }
+        
+        /**
+         * 上移参数
+         */
+        function moveParamUp(id) {
+            const index = reportData.params.findIndex(p => p.id === id);
+            if (index > 0) {
+                [reportData.params[index], reportData.params[index - 1]] = 
+                [reportData.params[index - 1], reportData.params[index]];
+                renderParamTable();
+                saveDraft();
+            }
+        }
+        
+        /**
+         * 下移参数
+         */
+        function moveParamDown(id) {
+            const index = reportData.params.findIndex(p => p.id === id);
+            if (index < reportData.params.length - 1) {
+                [reportData.params[index], reportData.params[index + 1]] = 
+                [reportData.params[index + 1], reportData.params[index]];
+                renderParamTable();
+                saveDraft();
+            }
+        }
+        
+        /**
+         * 渲染参数表格
+         */
+        function renderParamTable() {
+            const tbody = document.getElementById('paramTableBody');
+            const emptyHint = document.getElementById('emptyParamHint');
+            
+            if (reportData.params.length === 0) {
+                tbody.innerHTML = '';
+                emptyHint.style.display = 'block';
+                return;
+            }
+            
+            emptyHint.style.display = 'none';
+            
+            tbody.innerHTML = reportData.params.map((param, index) => `
+                <tr data-id="${param.id}">
+                    <td>
+                        <input type="text" value="${param.paramName}" 
+                               onchange="updateParam(${param.id}, 'paramName', this.value)"
+                               placeholder="参数名">
+                    </td>
+                    <td>
+                        <select onchange="updateParam(${param.id}, 'paramType', this.value)">
+                            <option value="STRING" ${param.paramType === 'STRING' ? 'selected' : ''}>STRING</option>
+                            <option value="NUMBER" ${param.paramType === 'NUMBER' ? 'selected' : ''}>NUMBER</option>
+                            <option value="DATE" ${param.paramType === 'DATE' ? 'selected' : ''}>DATE</option>
+                            <option value="DATETIME" ${param.paramType === 'DATETIME' ? 'selected' : ''}>DATETIME</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" value="${param.defaultValue}" 
+                               onchange="updateParam(${param.id}, 'defaultValue', this.value)"
+                               placeholder="默认值">
+                    </td>
+                    <td style="text-align: center;">
+                        <label class="checkbox">
+                            <input type="checkbox" ${param.isRequired ? 'checked' : ''}
+                                   onchange="updateParam(${param.id}, 'isRequired', this.checked)">
+                        </label>
+                    </td>
+                    <td>
+                        <input type="text" value="${param.desc}" 
+                               onchange="updateParam(${param.id}, 'desc', this.value)"
+                               placeholder="参数说明">
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-text btn-small" 
+                                onclick="moveParamUp(${param.id})"
+                                ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="btn btn-text btn-small" 
+                                onclick="moveParamDown(${param.id})"
+                                ${index === reportData.params.length - 1 ? 'disabled' : ''}>↓</button>
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-text btn-danger btn-small" 
+                                onclick="deleteParam(${param.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        /**
+         * 更新参数
+         */
+        function updateParam(id, field, value) {
+            const param = reportData.params.find(p => p.id === id);
+            if (param) {
+                param[field] = value;
+                saveDraft();
+            }
+        }
+        
+        // ========================================
+        // 列配置函数
+        // ========================================
+        
+        /**
+         * 自动提取列信息
+         */
+        function extractColumns() {
+            const btn = document.getElementById('extractColumnsBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ 提取中...';
+            
+            // 模拟提取列信息
+            setTimeout(() => {
+                const mockColumns = [
+                    { fieldName: 'user_id', dataType: 'INTEGER' },
+                    { fieldName: 'username', dataType: 'VARCHAR' },
+                    { fieldName: 'email', dataType: 'VARCHAR' },
+                    { fieldName: 'created_at', dataType: 'TIMESTAMP' },
+                    { fieldName: 'total_amount', dataType: 'DECIMAL' }
+                ];
+                
+                reportData.columns = mockColumns.map((col, index) => ({
+                    id: generateId(),
+                    fieldName: col.fieldName,
+                    displayName: col.fieldName,
+                    columnWidth: 100,
+                    formatType: col.dataType === 'TIMESTAMP' ? 'DATE' : 
+                                (col.dataType === 'DECIMAL' || col.dataType === 'INTEGER') ? 'NUMBER' : 
+                                col.fieldName.includes('amount') || col.fieldName.includes('price') ? 'CURRENCY' : 'DEFAULT',
+                    isVisible: true,
+                    sortOrder: index
+                }));
+                
+                renderColumnTable();
+                saveDraft();
+                showToast(`已提取${mockColumns.length}列信息`, 'success');
+                
+                btn.disabled = false;
+                btn.innerHTML = '🔄 自动提取列信息';
+            }, 1500);
+        }
+        
+        /**
+         * 渲染列配置表格
+         */
+        function renderColumnTable() {
+            const tbody = document.getElementById('columnTableBody');
+            const emptyHint = document.getElementById('emptyColumnHint');
+            
+            if (reportData.columns.length === 0) {
+                tbody.innerHTML = '';
+                emptyHint.style.display = 'block';
+                return;
+            }
+            
+            emptyHint.style.display = 'none';
+            
+            tbody.innerHTML = reportData.columns.map((col, index) => `
+                <tr data-id="${col.id}">
+                    <td><strong>${col.fieldName}</strong></td>
+                    <td>
+                        <input type="text" value="${col.displayName}" 
+                               onchange="updateColumn(${col.id}, 'displayName', this.value)"
+                               placeholder="显示名称">
+                    </td>
+                    <td>
+                        <input type="number" value="${col.columnWidth}" min="50" max="500"
+                               onchange="updateColumn(${col.id}, 'columnWidth', parseInt(this.value))"
+                               style="text-align: center;">
+                    </td>
+                    <td>
+                        <select onchange="updateColumn(${col.id}, 'formatType', this.value)">
+                            <option value="DEFAULT" ${col.formatType === 'DEFAULT' ? 'selected' : ''}>DEFAULT</option>
+                            <option value="DATE" ${col.formatType === 'DATE' ? 'selected' : ''}>DATE</option>
+                            <option value="NUMBER" ${col.formatType === 'NUMBER' ? 'selected' : ''}>NUMBER</option>
+                            <option value="CURRENCY" ${col.formatType === 'CURRENCY' ? 'selected' : ''}>CURRENCY</option>
+                        </select>
+                    </td>
+                    <td style="text-align: center;">
+                        <label class="switch">
+                            <input type="checkbox" ${col.isVisible ? 'checked' : ''}
+                                   onchange="updateColumn(${col.id}, 'isVisible', this.checked)">
+                            <span class="switch-slider"></span>
+                        </label>
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-text btn-small" 
+                                onclick="moveColumnUp(${col.id})"
+                                ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="btn btn-text btn-small" 
+                                onclick="moveColumnDown(${col.id})"
+                                ${index === reportData.columns.length - 1 ? 'disabled' : ''}>↓</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        /**
+         * 更新列配置
+         */
+        function updateColumn(id, field, value) {
+            const column = reportData.columns.find(c => c.id === id);
+            if (column) {
+                column[field] = value;
+                saveDraft();
+            }
+        }
+        
+        /**
+         * 上移列
+         */
+        function moveColumnUp(id) {
+            const index = reportData.columns.findIndex(c => c.id === id);
+            if (index > 0) {
+                [reportData.columns[index], reportData.columns[index - 1]] = 
+                [reportData.columns[index - 1], reportData.columns[index]];
+                renderColumnTable();
+                saveDraft();
+            }
+        }
+        
+        /**
+         * 下移列
+         */
+        function moveColumnDown(id) {
+            const index = reportData.columns.findIndex(c => c.id === id);
+            if (index < reportData.columns.length - 1) {
+                [reportData.columns[index], reportData.columns[index + 1]] = 
+                [reportData.columns[index + 1], reportData.columns[index]];
+                renderColumnTable();
+                saveDraft();
+            }
+        }
+        
+        /**
+         * 全部显示
+         */
+        function showAllColumns() {
+            reportData.columns.forEach(col => col.isVisible = true);
+            renderColumnTable();
+            saveDraft();
+            showToast('已显示所有列', 'success');
+        }
+        
+        /**
+         * 全部隐藏
+         */
+        function hideAllColumns() {
+            reportData.columns.forEach(col => col.isVisible = false);
+            renderColumnTable();
+            saveDraft();
+            showToast('已隐藏所有列', 'warning');
+        }
+        
+        // ========================================
+        // 事件处理函数
+        // ========================================
+        
+        /**
+         * 下一步
+         */
+        function handleNext() {
+            if (currentStep === 3) {
+                switchStep(4);
+            }
+        }
+        
+        /**
+         * 上一步
+         */
+        function handlePrev() {
+            if (currentStep === 4) {
+                switchStep(3);
+            }
+        }
+        
+        /**
+         * 返回Step 2
+         */
+        function backToStep2() {
+            if (confirm('返回Step 2将保留当前配置，是否继续？')) {
+                window.location.href = 'report-create-step1-2.html';
+            }
+        }
+        
+        /**
+         * 保存报表
+         */
+        function saveReport() {
+            // 验证必填项
+            if (reportData.columns.length === 0) {
+                showToast('请先配置列信息', 'warning');
+                return;
+            }
+            
+            const visibleColumns = reportData.columns.filter(c => c.isVisible);
+            if (visibleColumns.length === 0) {
+                if (!confirm('所有列都已隐藏，用户将无法查看数据，是否继续保存？')) {
+                    return;
+                }
+            }
+            
+            const btn = document.getElementById('saveReportBtn');
+            btn.disabled = true;
+            btn.innerHTML = '💾 保存中...';
+            
+            // 模拟保存
+            setTimeout(() => {
+                showToast('报表保存成功！', 'success');
+                localStorage.removeItem('reportDraft');
+                
+                setTimeout(() => {
+                    window.location.href = 'report-list.html';
+                }, 1500);
+            }, 2000);
+        }
+        
+        // ========================================
+        // 页面初始化
+        // ========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 显示检测到的参数数量
+            document.getElementById('detectedParamsCount').textContent = detectedParams.length;
+            
+            // 如果有检测到的参数但未配置，自动添加
+            if (reportData.params.length === 0 && detectedParams.length > 0) {
+                detectedParams.forEach(paramName => {
+                    addParam(paramName, 'STRING', '', false, '');
+                });
+            } else {
+                renderParamTable();
+            }
+            
+            // 渲染列配置
+            renderColumnTable();
+            
+            // 绑定事件
+            document.getElementById('addParamBtn').addEventListener('click', () => addParam());
+            document.getElementById('extractColumnsBtn').addEventListener('click', extractColumns);
+            document.getElementById('showAllBtn').addEventListener('click', showAllColumns);
+            document.getElementById('hideAllBtn').addEventListener('click', hideAllColumns);
+            document.getElementById('nextBtn').addEventListener('click', handleNext);
+            document.getElementById('prevBtn').addEventListener('click', handlePrev);
+            document.getElementById('backToStep2Btn').addEventListener('click', backToStep2);
+            document.getElementById('saveReportBtn').addEventListener('click', saveReport);
+        });
+    </script>
+</body>
+</html>

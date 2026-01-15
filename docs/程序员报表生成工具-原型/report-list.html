@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报表列表 - 程序员报表生成工具</title>
+    <style>
+        /* ========== CSS变量定义 ========== */
+        :root {
+            --primary-color: #409EFF;
+            --success-color: #67C23A;
+            --warning-color: #E6A23C;
+            --danger-color: #F56C6C;
+            --info-color: #909399;
+            --border-radius: 4px;
+            --box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+        
+        /* ========== 全局样式 ========== */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            color: #303133;
+            background-color: #f0f2f5;
+            line-height: 1.5;
+        }
+        
+        /* ========== 布局容器 ========== */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-lg);
+        }
+        
+        /* ========== 页面头部 ========== */
+        .page-header {
+            background: white;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #303133;
+        }
+        
+        /* ========== 工具栏 ========== */
+        .toolbar {
+            background: white;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-box {
+            width: 300px;
+            padding: 8px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        /* ========== 按钮样式 ========== */
+        .btn {
+            padding: 9px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #66b1ff;
+        }
+        
+        .btn-text {
+            background: transparent;
+            color: var(--primary-color);
+            padding: 0;
+        }
+        
+        .btn-text:hover:not(:disabled) {
+            color: #66b1ff;
+        }
+        
+        .btn-text.btn-danger {
+            color: var(--danger-color);
+        }
+        
+        .btn-text.btn-danger:hover:not(:disabled) {
+            color: #f78989;
+        }
+        
+        /* ========== 表格样式 ========== */
+        .table-container {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table thead {
+            background: #fafafa;
+        }
+        
+        .table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #606266;
+            border-bottom: 1px solid #EBEEF5;
+        }
+        
+        .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #EBEEF5;
+            color: #606266;
+        }
+        
+        .table tbody tr:hover {
+            background: #f5f7fa;
+        }
+        
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* ========== 操作按钮组 ========== */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* ========== 空状态 ========== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #909399;
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .empty-text {
+            font-size: 14px;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        /* ========== 加载状态 ========== */
+        .loading-skeleton {
+            padding: 16px;
+        }
+        
+        .skeleton-item {
+            height: 48px;
+            background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 50%, #f2f2f2 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s ease-in-out infinite;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* ========== 对话框样式 ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+            width: 420px;
+            max-width: 90%;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .modal-header {
+            padding: 20px 20px 10px;
+            border-bottom: 1px solid #EBEEF5;
+        }
+        
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #303133;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            color: #606266;
+            line-height: 1.6;
+        }
+        
+        .modal-footer {
+            padding: 10px 20px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn-default {
+            background: white;
+            color: #606266;
+            border: 1px solid #DCDFE6;
+        }
+        
+        .btn-default:hover:not(:disabled) {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background: #ecf5ff;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #f78989;
+        }
+        
+        /* ========== Toast提示 ========== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease;
+        }
+        
+        .toast-success { background: var(--success-color); }
+        .toast-error { background: var(--danger-color); }
+        .toast-warning { background: var(--warning-color); }
+        .toast-info { background: var(--info-color); }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+        
+        /* ========== 标签样式 ========== */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+        
+        .tag-success {
+            background: #f0f9ff;
+            color: var(--success-color);
+            border: 1px solid #b3e19d;
+        }
+        
+        .tag-info {
+            background: #f4f4f5;
+            color: var(--info-color);
+            border: 1px solid #d3d4d6;
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== 应用容器 ========== -->
+    <div class="app-container">
+        
+        <!-- ========== 页面头部 ========== -->
+        <div class="page-header">
+            <h1 class="page-title">📊 报表列表</h1>
+            <div style="color: #909399;">
+                当前用户：<strong>张三（DESIGNER）</strong>
+            </div>
+        </div>
+        
+        <!-- ========== 工具栏 ========== -->
+        <div class="toolbar">
+            <input 
+                type="text" 
+                class="search-box" 
+                id="searchInput"
+                placeholder="搜索报表名称..."
+            >
+            <button class="btn btn-primary" id="createBtn">
+                <span>➕</span> 创建报表
+            </button>
+        </div>
+        
+        <!-- ========== 表格容器 ========== -->
+        <div class="table-container" id="tableContainer">
+            <!-- 加载中骨架屏 -->
+            <div class="loading-skeleton" id="loadingSkeleton">
+                <div class="skeleton-item"></div>
+                <div class="skeleton-item"></div>
+                <div class="skeleton-item"></div>
+            </div>
+            
+            <!-- 报表表格 -->
+            <table class="table" id="reportTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>报表名称</th>
+                        <th>报表描述</th>
+                        <th>创建人</th>
+                        <th>创建时间</th>
+                        <th>状态</th>
+                        <th style="width: 200px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody">
+                    <!-- 动态填充 -->
+                </tbody>
+            </table>
+            
+            <!-- 空状态 -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-icon">📋</div>
+                <div class="empty-text">暂无报表数据</div>
+                <button class="btn btn-primary" onclick="handleCreate()">
+                    <span>➕</span> 创建第一个报表
+                </button>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- ========== 删除确认对话框 ========== -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">⚠️ 确认删除</h3>
+            </div>
+            <div class="modal-body" id="deleteModalBody">
+                确定要删除报表 <strong id="deleteReportName"></strong> 吗？
+                <br><br>
+                <span style="color: var(--danger-color);">此操作不可恢复！</span>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeDeleteModal()">取消</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ========== Toast容器 ========== -->
+    <div id="toastContainer"></div>
+    
+    <script>
+        // ========================================
+        // 模拟数据定义
+        // ========================================
+        
+        /**
+         * 模拟报表数据
+         */
+        let mockReports = [
+            {
+                id: 1,
+                reportName: '用户注册趋势分析',
+                reportDesc: '分析近30天的用户注册数据，按日期统计新增用户数',
+                creator: '张三',
+                createdAt: '2025-12-20 10:30:00',
+                status: 'published'
+            },
+            {
+                id: 2,
+                reportName: '订单金额统计',
+                reportDesc: '统计各区域的订单总金额和平均订单金额',
+                creator: '李四',
+                createdAt: '2025-12-18 14:20:00',
+                status: 'published'
+            },
+            {
+                id: 3,
+                reportName: '客户流失预警',
+                reportDesc: '识别近90天未下单的客户，进行流失预警',
+                creator: '王五',
+                createdAt: '2025-12-15 09:15:00',
+                status: 'draft'
+            },
+            {
+                id: 4,
+                reportName: '产品销售排行榜',
+                reportDesc: '统计各产品的销售数量和销售额，生成排行榜',
+                creator: '张三',
+                createdAt: '2025-12-10 16:45:00',
+                status: 'published'
+            }
+        ];
+        
+        // 从localStorage加载数据
+        const savedReports = localStorage.getItem('mockReports');
+        if (savedReports) {
+            mockReports = JSON.parse(savedReports);
+        }
+        
+        // 当前筛选的报表列表
+        let filteredReports = [...mockReports];
+        
+        // 待删除的报表ID
+        let reportToDelete = null;
+        
+        // ========================================
+        // 工具函数
+        // ========================================
+        
+        /**
+         * 防抖函数
+         * @param {Function} fn 要执行的函数
+         * @param {number} delay 延迟时间（毫秒）
+         */
+        function debounce(fn, delay) {
+            let timer = null;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+        
+        /**
+         * 显示Toast提示
+         * @param {string} message 提示内容
+         * @param {string} type 类型：success/error/warning/info
+         * @param {number} duration 持续时间（毫秒）
+         */
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icon = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            }[type] || 'ℹ️';
+            
+            toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'fadeIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
+        /**
+         * 保存数据到localStorage
+         */
+        function saveToStorage() {
+            localStorage.setItem('mockReports', JSON.stringify(mockReports));
+        }
+        
+        // ========================================
+        // 页面渲染函数
+        // ========================================
+        
+        /**
+         * 渲染报表列表
+         */
+        function renderReportList() {
+            const tbody = document.getElementById('reportTableBody');
+            const table = document.getElementById('reportTable');
+            const emptyState = document.getElementById('emptyState');
+            const skeleton = document.getElementById('loadingSkeleton');
+            
+            // 隐藏骨架屏
+            skeleton.style.display = 'none';
+            
+            if (filteredReports.length === 0) {
+                table.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            table.style.display = 'table';
+            emptyState.style.display = 'none';
+            
+            tbody.innerHTML = filteredReports.map(report => `
+                <tr data-id="${report.id}">
+                    <td><strong>${report.reportName}</strong></td>
+                    <td>${report.reportDesc || '-'}</td>
+                    <td>${report.creator}</td>
+                    <td>${report.createdAt}</td>
+                    <td>
+                        ${report.status === 'published' 
+                            ? '<span class="tag tag-success">已发布</span>' 
+                            : '<span class="tag tag-info">草稿</span>'}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-text" onclick="handleEdit(${report.id})">
+                                ✏️ 编辑
+                            </button>
+                            <button class="btn btn-text" onclick="handlePreview(${report.id})">
+                                👁️ 预览
+                            </button>
+                            <button class="btn btn-text" onclick="handlePermission(${report.id})">
+                                🔒 权限
+                            </button>
+                            <button class="btn btn-text btn-danger" onclick="handleDelete(${report.id})">
+                                🗑️ 删除
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // ========================================
+        // 事件处理函数
+        // ========================================
+        
+        /**
+         * 搜索报表
+         */
+        const handleSearch = debounce(function(keyword) {
+            if (!keyword.trim()) {
+                filteredReports = [...mockReports];
+            } else {
+                filteredReports = mockReports.filter(report => 
+                    report.reportName.toLowerCase().includes(keyword.toLowerCase())
+                );
+            }
+            renderReportList();
+        }, 300);
+        
+        /**
+         * 创建报表
+         */
+        function handleCreate() {
+            showToast('跳转到报表创建页面...', 'info');
+            // 实际项目中这里会跳转到创建页面
+            setTimeout(() => {
+                window.location.href = 'report-create-step1-2.html';
+            }, 1000);
+        }
+        
+        /**
+         * 编辑报表
+         */
+        function handleEdit(reportId) {
+            const report = mockReports.find(r => r.id === reportId);
+            if (report) {
+                showToast(`编辑报表: ${report.reportName}`, 'info');
+                // 实际项目中这里会跳转到编辑页面
+                setTimeout(() => {
+                    window.location.href = `report-create-step1-2.html?id=${reportId}`;
+                }, 1000);
+            }
+        }
+        
+        /**
+         * 预览报表
+         */
+        function handlePreview(reportId) {
+            const report = mockReports.find(r => r.id === reportId);
+            if (report) {
+                showToast(`预览报表: ${report.reportName}`, 'info');
+                // 实际项目中这里会跳转到预览页面
+                setTimeout(() => {
+                    window.location.href = `report-preview.html?id=${reportId}`;
+                }, 1000);
+            }
+        }
+        
+        /**
+         * 权限配置
+         */
+        function handlePermission(reportId) {
+            const report = mockReports.find(r => r.id === reportId);
+            if (report) {
+                showToast(`配置权限: ${report.reportName}`, 'info');
+                // 实际项目中这里会打开权限配置对话框或跳转页面
+            }
+        }
+        
+        /**
+         * 删除报表
+         */
+        function handleDelete(reportId) {
+            const report = mockReports.find(r => r.id === reportId);
+            if (report) {
+                reportToDelete = reportId;
+                document.getElementById('deleteReportName').textContent = report.reportName;
+                document.getElementById('deleteModal').classList.add('show');
+            }
+        }
+        
+        /**
+         * 关闭删除对话框
+         */
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            reportToDelete = null;
+        }
+        
+        /**
+         * 确认删除报表
+         */
+        function confirmDelete() {
+            if (reportToDelete) {
+                const index = mockReports.findIndex(r => r.id === reportToDelete);
+                if (index > -1) {
+                    const deletedReport = mockReports[index];
+                    mockReports.splice(index, 1);
+                    saveToStorage();
+                    
+                    // 更新筛选列表
+                    const searchKeyword = document.getElementById('searchInput').value;
+                    if (!searchKeyword.trim()) {
+                        filteredReports = [...mockReports];
+                    } else {
+                        filteredReports = mockReports.filter(report => 
+                            report.reportName.toLowerCase().includes(searchKeyword.toLowerCase())
+                        );
+                    }
+                    
+                    renderReportList();
+                    closeDeleteModal();
+                    showToast(`报表"${deletedReport.reportName}"已删除`, 'success');
+                }
+            }
+        }
+        
+        // ========================================
+        // 事件绑定
+        // ========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始渲染
+            setTimeout(() => {
+                renderReportList();
+            }, 800); // 模拟加载延迟
+            
+            // 搜索框事件
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                handleSearch(e.target.value);
+            });
+            
+            // 创建按钮事件
+            document.getElementById('createBtn').addEventListener('click', handleCreate);
+            
+            // 确认删除按钮事件
+            document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+            
+            // 点击遮罩层关闭对话框
+            document.getElementById('deleteModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDeleteModal();
+                }
+            });
+            
+            // ESC键关闭对话框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeDeleteModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

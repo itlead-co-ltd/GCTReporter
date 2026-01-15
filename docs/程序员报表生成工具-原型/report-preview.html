@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报表预览 - 程序员报表生成工具</title>
+    <style>
+        /* ========== CSS变量定义 ========== */
+        :root {
+            --primary-color: #409EFF;
+            --success-color: #67C23A;
+            --warning-color: #E6A23C;
+            --danger-color: #F56C6C;
+            --info-color: #909399;
+            --border-radius: 4px;
+            --box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+        
+        /* ========== 全局样式 ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            color: #303133;
+            background-color: #f0f2f5;
+            line-height: 1.5;
+        }
+        
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-lg);
+        }
+        
+        /* ========== 页面头部 ========== */
+        .page-header {
+            background: white;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left .breadcrumb {
+            color: #909399;
+            font-size: 14px;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #303133;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* ========== 按钮样式 ========== */
+        .btn {
+            padding: 9px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #66b1ff;
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #85ce61;
+        }
+        
+        .btn-default {
+            background: white;
+            color: #606266;
+            border: 1px solid #DCDFE6;
+        }
+        
+        .btn-default:hover:not(:disabled) {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background: #ecf5ff;
+        }
+        
+        /* ========== 查询区域 ========== */
+        .query-panel {
+            background: white;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .query-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .query-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .form-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .form-label {
+            font-size: 13px;
+            color: #606266;
+            font-weight: 500;
+        }
+        
+        .form-label .required {
+            color: var(--danger-color);
+            margin-left: 2px;
+        }
+        
+        .form-input {
+            padding: 8px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .form-input.error {
+            border-color: var(--danger-color);
+        }
+        
+        .error-message {
+            font-size: 12px;
+            color: var(--danger-color);
+            margin-top: 4px;
+        }
+        
+        .query-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* ========== 结果区域 ========== */
+        .result-panel {
+            background: white;
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid #EBEEF5;
+        }
+        
+        .result-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .result-info {
+            font-size: 13px;
+            color: #909399;
+        }
+        
+        /* ========== 表格样式 ========== */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table thead {
+            background: #fafafa;
+        }
+        
+        .data-table th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #606266;
+            border: 1px solid #EBEEF5;
+            font-size: 13px;
+        }
+        
+        .data-table td {
+            padding: 10px 8px;
+            border: 1px solid #EBEEF5;
+            font-size: 13px;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f5f7fa;
+        }
+        
+        /* ========== 分页样式 ========== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: var(--spacing-lg);
+        }
+        
+        .page-info {
+            color: #606266;
+            font-size: 13px;
+        }
+        
+        .page-btn {
+            padding: 5px 10px;
+            border: 1px solid #DCDFE6;
+            background: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        /* ========== 空状态 ========== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #909399;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .empty-state-text {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state-hint {
+            font-size: 13px;
+            color: #C0C4CC;
+        }
+        
+        /* ========== 加载状态 ========== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .loading-spinner {
+            background: white;
+            padding: 30px 40px;
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* ========== 模态框样式 ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #EBEEF5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #909399;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: #f5f7fa;
+            color: #303133;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid #EBEEF5;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* ========== 权限配置样式 ========== */
+        .permission-group {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .permission-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #606266;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .role-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .role-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            border: 1px solid #EBEEF5;
+            border-radius: var(--border-radius);
+            transition: all 0.2s;
+        }
+        
+        .role-item:hover {
+            background: #f5f7fa;
+        }
+        
+        .role-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .role-info {
+            flex: 1;
+        }
+        
+        .role-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #303133;
+        }
+        
+        .role-desc {
+            font-size: 12px;
+            color: #909399;
+            margin-top: 2px;
+        }
+        
+        /* ========== Toast提示 ========== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            animation: toastSlideDown 0.3s ease;
+        }
+        
+        .toast-success { background: var(--success-color); }
+        .toast-error { background: var(--danger-color); }
+        .toast-warning { background: var(--warning-color); }
+        .toast-info { background: var(--info-color); }
+        
+        @keyframes toastSlideDown {
+            from { 
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== 应用容器 ========== -->
+    <div class="app-container">
+        
+        <!-- ========== 页面头部 ========== -->
+        <div class="page-header">
+            <div class="header-left">
+                <div class="breadcrumb">
+                    <a href="report-list.html">📊 报表列表</a> / 报表预览
+                </div>
+                <h1 class="page-title">📈 用户注册趋势分析</h1>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-default" onclick="showPermissionModal()">
+                    🔒 权限管理
+                </button>
+                <button class="btn btn-default" onclick="backToList()">
+                    ← 返回列表
+                </button>
+            </div>
+        </div>
+        
+        <!-- ========== 查询参数区域 ========== -->
+        <div class="query-panel">
+            <h2 class="query-title">
+                🔍 查询参数
+            </h2>
+            
+            <form id="queryForm" class="query-form">
+                <div class="form-item">
+                    <label class="form-label">
+                        开始日期 <span class="required">*</span>
+                    </label>
+                    <input type="date" class="form-input" id="startDate" required>
+                    <div class="error-message" id="startDateError"></div>
+                </div>
+                
+                <div class="form-item">
+                    <label class="form-label">
+                        结束日期 <span class="required">*</span>
+                    </label>
+                    <input type="date" class="form-input" id="endDate" required>
+                    <div class="error-message" id="endDateError"></div>
+                </div>
+                
+                <div class="form-item">
+                    <label class="form-label">
+                        状态
+                    </label>
+                    <select class="form-input" id="status">
+                        <option value="">全部</option>
+                        <option value="ACTIVE">已激活</option>
+                        <option value="INACTIVE">未激活</option>
+                        <option value="BANNED">已封禁</option>
+                    </select>
+                </div>
+            </form>
+            
+            <div class="query-actions">
+                <button class="btn btn-default" onclick="resetForm()">
+                    🔄 重置
+                </button>
+                <button class="btn btn-primary" onclick="executeQuery()">
+                    ▶️ 执行查询
+                </button>
+            </div>
+        </div>
+        
+        <!-- ========== 查询结果区域 ========== -->
+        <div class="result-panel">
+            <div class="result-header">
+                <div class="result-title">
+                    📋 查询结果
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <span class="result-info" id="resultInfo">
+                        共 0 条记录，耗时 0ms
+                    </span>
+                    <button class="btn btn-success btn-small" onclick="exportExcel()" id="exportBtn" disabled>
+                        📥 导出Excel
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container" id="tableContainer">
+                <!-- 空状态 -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">📊</div>
+                    <div class="empty-state-text">暂无数据</div>
+                    <div class="empty-state-hint">请设置查询参数并点击"执行查询"</div>
+                </div>
+                
+                <!-- 数据表格（初始隐藏） -->
+                <table class="data-table" id="dataTable" style="display: none;">
+                    <thead id="tableHead">
+                        <!-- 动态生成 -->
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- 动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 分页 -->
+            <div class="pagination" id="pagination" style="display: none;">
+                <button class="page-btn" id="prevPageBtn" onclick="changePage(-1)">
+                    ← 上一页
+                </button>
+                <span class="page-info" id="pageInfo">
+                    第 1 页 / 共 1 页
+                </span>
+                <button class="page-btn" id="nextPageBtn" onclick="changePage(1)">
+                    下一页 →
+                </button>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- ========== 加载状态 ========== -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <div>查询执行中...</div>
+        </div>
+    </div>
+    
+    <!-- ========== 权限管理模态框 ========== -->
+    <div class="modal-overlay" id="permissionModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">🔒 权限管理</h3>
+                <button class="modal-close" onclick="closePermissionModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="permission-group">
+                    <div class="permission-label">选择可访问此报表的角色：</div>
+                    <div class="role-list">
+                        <label class="role-item">
+                            <input type="checkbox" value="ADMIN" checked>
+                            <div class="role-info">
+                                <div class="role-name">👑 管理员 (ADMIN)</div>
+                                <div class="role-desc">拥有所有权限，可管理用户和报表</div>
+                            </div>
+                        </label>
+                        <label class="role-item">
+                            <input type="checkbox" value="DESIGNER" checked>
+                            <div class="role-info">
+                                <div class="role-name">✏️ 设计者 (DESIGNER)</div>
+                                <div class="role-desc">可创建、编辑和查看报表</div>
+                            </div>
+                        </label>
+                        <label class="role-item">
+                            <input type="checkbox" value="VIEWER">
+                            <div class="role-info">
+                                <div class="role-name">👁️ 查看者 (VIEWER)</div>
+                                <div class="role-desc">仅可查看和导出报表数据</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closePermissionModal()">
+                    取消
+                </button>
+                <button class="btn btn-primary" onclick="savePermissions()">
+                    💾 保存权限
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ========== Toast容器 ========== -->
+    <div id="toastContainer"></div>
+    
+    <script>
+        // ========================================
+        // 全局状态管理
+        // ========================================
+        
+        let currentPage = 1;
+        const pageSize = 20;
+        let totalRecords = 0;
+        let allData = [];
+        let columnConfig = [
+            { fieldName: 'user_id', displayName: '用户ID', columnWidth: 80, formatType: 'NUMBER', isVisible: true },
+            { fieldName: 'username', displayName: '用户名', columnWidth: 120, formatType: 'DEFAULT', isVisible: true },
+            { fieldName: 'email', displayName: '邮箱', columnWidth: 200, formatType: 'DEFAULT', isVisible: true },
+            { fieldName: 'created_at', displayName: '注册时间', columnWidth: 160, formatType: 'DATE', isVisible: true },
+            { fieldName: 'total_amount', displayName: '总消费金额', columnWidth: 120, formatType: 'CURRENCY', isVisible: true }
+        ];
+        
+        // ========================================
+        // 工具函数
+        // ========================================
+        
+        /**
+         * 显示Toast提示
+         */
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icon = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            }[type] || 'ℹ️';
+            
+            toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'toastSlideDown 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
+        /**
+         * 格式化数据
+         */
+        function formatValue(value, formatType) {
+            if (value === null || value === undefined) return '-';
+            
+            switch (formatType) {
+                case 'DATE':
+                    return new Date(value).toLocaleString('zh-CN');
+                case 'NUMBER':
+                    return Number(value).toLocaleString('zh-CN');
+                case 'CURRENCY':
+                    return '¥' + Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                default:
+                    return value;
+            }
+        }
+        
+        /**
+         * 生成模拟数据
+         */
+        function generateMockData(count) {
+            const statuses = ['ACTIVE', 'INACTIVE', 'BANNED'];
+            const names = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'];
+            const data = [];
+            
+            for (let i = 1; i <= count; i++) {
+                const randomDate = new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
+                data.push({
+                    user_id: 1000 + i,
+                    username: names[Math.floor(Math.random() * names.length)] + i,
+                    email: `user${i}@example.com`,
+                    created_at: randomDate.toISOString(),
+                    total_amount: (Math.random() * 10000).toFixed(2),
+                    status: statuses[Math.floor(Math.random() * statuses.length)]
+                });
+            }
+            
+            return data;
+        }
+        
+        // ========================================
+        // 查询执行函数
+        // ========================================
+        
+        /**
+         * 执行查询
+         */
+        function executeQuery() {
+            // 验证表单
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let hasError = false;
+            
+            if (!startDate) {
+                document.getElementById('startDateError').textContent = '请选择开始日期';
+                document.getElementById('startDate').classList.add('error');
+                hasError = true;
+            } else {
+                document.getElementById('startDateError').textContent = '';
+                document.getElementById('startDate').classList.remove('error');
+            }
+            
+            if (!endDate) {
+                document.getElementById('endDateError').textContent = '请选择结束日期';
+                document.getElementById('endDate').classList.add('error');
+                hasError = true;
+            } else {
+                document.getElementById('endDateError').textContent = '';
+                document.getElementById('endDate').classList.remove('error');
+            }
+            
+            if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+                document.getElementById('endDateError').textContent = '结束日期不能早于开始日期';
+                document.getElementById('endDate').classList.add('error');
+                hasError = true;
+            }
+            
+            if (hasError) {
+                showToast('请检查输入参数', 'error');
+                return;
+            }
+            
+            // 显示加载状态
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            // 模拟查询（延迟1.5秒）
+            setTimeout(() => {
+                const startTime = Date.now();
+                
+                // 生成模拟数据（随机50-100条）
+                const count = 50 + Math.floor(Math.random() * 51);
+                allData = generateMockData(count);
+                totalRecords = allData.length;
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                // 隐藏加载状态
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+                // 重置到第一页
+                currentPage = 1;
+                
+                // 渲染数据
+                renderTable();
+                
+                // 更新结果信息
+                document.getElementById('resultInfo').textContent = 
+                    `共 ${totalRecords} 条记录，耗时 ${duration}ms`;
+                
+                // 启用导出按钮
+                document.getElementById('exportBtn').disabled = false;
+                
+                showToast('查询成功！', 'success');
+            }, 1500);
+        }
+        
+        /**
+         * 渲染表格
+         */
+        function renderTable() {
+            const visibleColumns = columnConfig.filter(col => col.isVisible);
+            
+            if (allData.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('dataTable').style.display = 'none';
+                document.getElementById('pagination').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('dataTable').style.display = 'table';
+            
+            // 渲染表头
+            const thead = document.getElementById('tableHead');
+            thead.innerHTML = `
+                <tr>
+                    ${visibleColumns.map(col => 
+                        `<th style="width: ${col.columnWidth}px;">${col.displayName}</th>`
+                    ).join('')}
+                </tr>
+            `;
+            
+            // 计算分页数据
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const pageData = allData.slice(startIndex, endIndex);
+            
+            // 渲染表格数据
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = pageData.map(row => `
+                <tr>
+                    ${visibleColumns.map(col => 
+                        `<td>${formatValue(row[col.fieldName], col.formatType)}</td>`
+                    ).join('')}
+                </tr>
+            `).join('');
+            
+            // 渲染分页
+            renderPagination();
+        }
+        
+        /**
+         * 渲染分页
+         */
+        function renderPagination() {
+            const totalPages = Math.ceil(totalRecords / pageSize);
+            
+            if (totalPages <= 1) {
+                document.getElementById('pagination').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('pagination').style.display = 'flex';
+            document.getElementById('pageInfo').textContent = 
+                `第 ${currentPage} 页 / 共 ${totalPages} 页`;
+            
+            document.getElementById('prevPageBtn').disabled = currentPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+        }
+        
+        /**
+         * 翻页
+         */
+        function changePage(delta) {
+            const totalPages = Math.ceil(totalRecords / pageSize);
+            const newPage = currentPage + delta;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                renderTable();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        
+        /**
+         * 重置表单
+         */
+        function resetForm() {
+            document.getElementById('queryForm').reset();
+            document.getElementById('startDateError').textContent = '';
+            document.getElementById('endDateError').textContent = '';
+            document.getElementById('startDate').classList.remove('error');
+            document.getElementById('endDate').classList.remove('error');
+            showToast('已重置查询条件', 'info');
+        }
+        
+        /**
+         * 导出Excel
+         */
+        function exportExcel() {
+            showToast('Excel导出功能开发中...', 'info');
+            // 实际项目中，这里应该调用后端接口或使用库如SheetJS来生成Excel
+        }
+        
+        // ========================================
+        // 权限管理函数
+        // ========================================
+        
+        /**
+         * 显示权限管理模态框
+         */
+        function showPermissionModal() {
+            document.getElementById('permissionModal').style.display = 'flex';
+        }
+        
+        /**
+         * 关闭权限管理模态框
+         */
+        function closePermissionModal() {
+            document.getElementById('permissionModal').style.display = 'none';
+        }
+        
+        /**
+         * 保存权限
+         */
+        function savePermissions() {
+            const checkboxes = document.querySelectorAll('#permissionModal input[type="checkbox"]');
+            const selectedRoles = [];
+            
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    selectedRoles.push(cb.value);
+                }
+            });
+            
+            if (selectedRoles.length === 0) {
+                showToast('请至少选择一个角色', 'warning');
+                return;
+            }
+            
+            // 模拟保存
+            setTimeout(() => {
+                showToast(`权限保存成功！可访问角色：${selectedRoles.join(', ')}`, 'success');
+                closePermissionModal();
+            }, 500);
+        }
+        
+        /**
+         * 返回列表
+         */
+        function backToList() {
+            window.location.href = 'report-list.html';
+        }
+        
+        // ========================================
+        // 页面初始化
+        // ========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置默认日期（最近30天）
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('startDate').valueAsDate = startDate;
+            document.getElementById('endDate').valueAsDate = endDate;
+            
+            // 监听表单提交
+            document.getElementById('queryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                executeQuery();
+            });
+            
+            // 点击模态框外部关闭
+            document.getElementById('permissionModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closePermissionModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
