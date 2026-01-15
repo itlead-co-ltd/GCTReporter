@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: gct-report-generator
+  
+  datasource:
+    url: jdbc:sqlite:./data/report.db
+    driver-class-name: org.sqlite.JDBC
+  
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+logging:
+  level:
+    com.gct.reportgenerator: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: INFO
