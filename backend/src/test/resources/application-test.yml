@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: "jdbc:sqlite::memory:"
+    driver-class-name: org.sqlite.JDBC
+  
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  
+  flyway:
+    enabled: false
+
+server:
+  port: 0  # 随机端口避免端口冲突
+
+logging:
+  level:
+    com.gct.reportgenerator: INFO
