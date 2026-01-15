@@ -34,3 +34,13 @@ logging:
     com.gct.reportgenerator: DEBUG
     org.springframework.web: INFO
     org.hibernate: INFO
+
+# Actuator 配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
