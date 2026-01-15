@@ -1,0 +1,27 @@
+# GCT Reporter - Code Owners
+# 
+# 代码所有者将自动被添加为PR的审查人
+# 格式: 文件路径 @github用户名
+
+# 全局代码所有者
+* @chuanminglu
+
+# 后端代码
+/src/main/java/** @chuanminglu
+
+# 前端代码
+/frontend/** @chuanminglu
+
+# 配置文件
+/src/main/resources/** @chuanminglu
+
+# 文档
+/docs/** @chuanminglu
+/README.md @chuanminglu
+
+# GitHub配置和工作流
+/.github/** @chuanminglu
+
+# 数据库相关
+*.sql @chuanminglu
+/src/main/resources/db/** @chuanminglu
