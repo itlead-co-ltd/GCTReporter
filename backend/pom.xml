@@ -126,15 +126,13 @@
                     <source>17</source>
                     <target>17</target>
                     <encoding>UTF-8</encoding>
-                    <compilerArgs>
-                        <!-- 禁用注解处理警告 -->
-                        <arg>-proc:none</arg>
-                        <!-- 显示所有警告 -->
-                        <arg>-Xlint:all</arg>
-                        <!-- 禁用某些不必要的警告 -->
-                        <arg>-Xlint:-processing</arg>
-                        <arg>-Xlint:-serial</arg>
-                    </compilerArgs>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>

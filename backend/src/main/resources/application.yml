@@ -9,11 +9,16 @@ spring:
   jpa:
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        id:
+          new_generator_mappings: false
   
   flyway:
     enabled: true
