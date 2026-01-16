@@ -69,8 +69,10 @@ public class UserService {
             throw new BusinessException("用户名已存在");
         }
         
-        // 创建用户实体
+        // 创建用户实体 (SQLite workaround: manually set ID)
+        Long nextId = userRepository.count() + 1;
         User user = User.builder()
+                .id(nextId)
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
