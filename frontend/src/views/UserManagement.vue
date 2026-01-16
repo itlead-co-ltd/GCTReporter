@@ -266,13 +266,14 @@ const handleSubmit = async () => {
 
 // 切换用户状态
 const handleToggleStatus = async (user: User) => {
+  const originalStatus = user.enabled
   try {
     await userApi.toggleUserStatus(user.id, user.enabled)
     ElMessage.success('状态更新成功')
   } catch (error) {
     console.error('更新状态失败:', error)
     // 恢复原状态
-    user.enabled = !user.enabled
+    user.enabled = originalStatus
   }
 }
 
