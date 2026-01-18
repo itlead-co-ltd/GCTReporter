@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCT Reporter - 登录登出原型</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        /* 登录页面 */
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group label .required {
+            color: #f56c6c;
+            margin-left: 4px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 18px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-input.error {
+            border-color: #f56c6c;
+        }
+
+        .error-message {
+            color: #f56c6c;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .login-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .test-accounts {
+            margin-top: 30px;
+            padding: 16px;
+            background: #f5f7fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .test-accounts h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .test-accounts ul {
+            list-style: none;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .test-accounts code {
+            background: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Courier New", monospace;
+            color: #667eea;
+        }
+
+        /* 主页面 */
+        .main-page {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .header {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            margin-right: 20px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-item {
+            color: #666;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: #f0f2ff;
+            color: #667eea;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-name {
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .user-role {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .logout-button {
+            padding: 8px 20px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .welcome-section h2 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .welcome-section p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .action-card {
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf4 100%);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .action-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .action-card h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .action-card p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Toast提示 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        .toast.success {
+            border-left: 4px solid #67c23a;
+        }
+
+        .toast.error {
+            border-left: 4px solid #f56c6c;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+        }
+
+        .toast.success .toast-icon {
+            color: #67c23a;
+        }
+
+        .toast.error .toast-icon {
+            color: #f56c6c;
+        }
+
+        .toast-message {
+            color: #333;
+            font-size: 14px;
+        }
+
+        /* 确认对话框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal h3 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .modal p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-button.cancel {
+            background: #f5f7fa;
+            color: #666;
+        }
+
+        .modal-button.cancel:hover {
+            background: #e8ecf4;
+        }
+
+        .modal-button.confirm {
+            background: #667eea;
+            color: white;
+        }
+
+        .modal-button.confirm:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .nav-menu {
+                flex-wrap: wrap;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div class="login-page" id="loginPage">
+        <div class="login-container">
+            <div class="logo">
+                <h1>GCT Reporter</h1>
+                <p>程序员报表生成工具</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">
+                        用户名<span class="required">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            class="form-input" 
+                            placeholder="请输入用户名"
+                            required
+                        >
+                    </div>
+                    <div class="error-message" id="usernameError">请输入用户名</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">
+                        密码<span class="required">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            class="form-input" 
+                            placeholder="请输入密码"
+                            required
+                        >
+                    </div>
+                    <div class="error-message" id="passwordError">请输入密码</div>
+                </div>
+
+                <button type="submit" class="login-button" id="loginButton">
+                    登录
+                </button>
+            </form>
+
+            <div class="test-accounts">
+                <h3>📋 测试账号</h3>
+                <ul>
+                    <li>管理员: <code>admin</code> / <code>admin123</code></li>
+                    <li>设计者: <code>designer</code> / <code>designer123</code></li>
+                    <li>查看者: <code>viewer</code> / <code>viewer123</code></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主页面 -->
+    <div class="main-page" id="mainPage">
+        <div class="container">
+            <header class="header">
+                <div class="header-left">
+                    <div class="header-logo">GCT Reporter</div>
+                    <nav class="nav-menu">
+                        <a href="#" class="nav-item active">首页</a>
+                        <a href="#" class="nav-item">报表管理</a>
+                        <a href="#" class="nav-item">用户管理</a>
+                        <a href="#" class="nav-item">系统设置</a>
+                    </nav>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">A</div>
+                        <div>
+                            <div class="user-name" id="userName">管理员</div>
+                            <div class="user-role" id="userRole">ADMIN</div>
+                        </div>
+                    </div>
+                    <button class="logout-button" id="logoutButton">
+                        退出登录
+                    </button>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="welcome-section">
+                    <h2>欢迎使用 GCT Reporter</h2>
+                    <p>强大的低代码报表生成工具，让数据分析更简单</p>
+
+                    <div class="quick-actions">
+                        <div class="action-card">
+                            <div class="action-icon">📊</div>
+                            <h3>创建报表</h3>
+                            <p>快速创建新的报表模板</p>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">📝</div>
+                            <h3>报表列表</h3>
+                            <p>查看和管理已有报表</p>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">👥</div>
+                            <h3>用户管理</h3>
+                            <p>管理系统用户和权限</p>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">📈</div>
+                            <h3>数据分析</h3>
+                            <p>查看报表执行统计</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast">
+        <div class="toast-icon" id="toastIcon">✓</div>
+        <div class="toast-message" id="toastMessage"></div>
+    </div>
+
+    <!-- 确认对话框 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3>确认退出</h3>
+            <p>您确定要退出登录吗？退出后需要重新登录才能访问系统。</p>
+            <div class="modal-buttons">
+                <button class="modal-button cancel" id="cancelButton">取消</button>
+                <button class="modal-button confirm" id="confirmButton">确认退出</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟的用户数据
+        const MOCK_USERS = {
+            'admin': {
+                username: 'admin',
+                password: 'admin123',
+                role: 'ADMIN',
+                displayName: '管理员',
+                avatar: 'A'
+            },
+            'designer': {
+                username: 'designer',
+                password: 'designer123',
+                role: 'DESIGNER',
+                displayName: '设计者',
+                avatar: 'D'
+            },
+            'viewer': {
+                username: 'viewer',
+                password: 'viewer123',
+                role: 'VIEWER',
+                displayName: '查看者',
+                avatar: 'V'
+            }
+        };
+
+        // 状态管理
+        let currentUser = null;
+
+        // DOM元素
+        const loginPage = document.getElementById('loginPage');
+        const mainPage = document.getElementById('mainPage');
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const cancelButton = document.getElementById('cancelButton');
+        const confirmButton = document.getElementById('confirmButton');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userRole = document.getElementById('userRole');
+
+        // 表单验证
+        function validateForm() {
+            let isValid = true;
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            // 验证用户名
+            if (!username) {
+                showFieldError('username', '请输入用户名');
+                isValid = false;
+            } else {
+                hideFieldError('username');
+            }
+
+            // 验证密码
+            if (!password) {
+                showFieldError('password', '请输入密码');
+                isValid = false;
+            } else {
+                hideFieldError('password');
+            }
+
+            return isValid;
+        }
+
+        function showFieldError(fieldName, message) {
+            const input = document.getElementById(fieldName);
+            const error = document.getElementById(fieldName + 'Error');
+            input.classList.add('error');
+            error.textContent = message;
+            error.classList.add('show');
+        }
+
+        function hideFieldError(fieldName) {
+            const input = document.getElementById(fieldName);
+            const error = document.getElementById(fieldName + 'Error');
+            input.classList.remove('error');
+            error.classList.remove('show');
+        }
+
+        // 显示Toast提示
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toast.className = `toast ${type} show`;
+            toastIcon.textContent = type === 'success' ? '✓' : '✗';
+            toastMessage.textContent = message;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 登录处理
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            // 禁用登录按钮
+            loginButton.disabled = true;
+            loginButton.textContent = '登录中...';
+
+            // 模拟API请求延迟
+            setTimeout(() => {
+                // 验证用户
+                const user = MOCK_USERS[username];
+                
+                if (!user) {
+                    showToast('用户不存在', 'error');
+                    showFieldError('username', '用户不存在');
+                    loginButton.disabled = false;
+                    loginButton.textContent = '登录';
+                    return;
+                }
+
+                if (user.password !== password) {
+                    showToast('密码错误', 'error');
+                    showFieldError('password', '密码错误');
+                    loginButton.disabled = false;
+                    loginButton.textContent = '登录';
+                    return;
+                }
+
+                // 登录成功
+                currentUser = user;
+                
+                // 保存Session（模拟）
+                sessionStorage.setItem('currentUser', JSON.stringify(user));
+                
+                // 显示成功提示
+                showToast(`欢迎回来，${user.displayName}！`, 'success');
+
+                // 延迟跳转到主页面
+                setTimeout(() => {
+                    loginPage.style.display = 'none';
+                    mainPage.style.display = 'block';
+                    updateUserInfo();
+                    loginButton.disabled = false;
+                    loginButton.textContent = '登录';
+                }, 1000);
+            }, 1000);
+        });
+
+        // 更新用户信息显示
+        function updateUserInfo() {
+            if (currentUser) {
+                userAvatar.textContent = currentUser.avatar;
+                userName.textContent = currentUser.displayName;
+                userRole.textContent = currentUser.role;
+            }
+        }
+
+        // 退出登录按钮点击
+        logoutButton.addEventListener('click', () => {
+            modalOverlay.classList.add('show');
+        });
+
+        // 取消退出
+        cancelButton.addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+        });
+
+        // 点击遮罩层关闭
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('show');
+            }
+        });
+
+        // 确认退出
+        confirmButton.addEventListener('click', () => {
+            // 清除Session
+            currentUser = null;
+            sessionStorage.removeItem('currentUser');
+
+            // 隐藏对话框
+            modalOverlay.classList.remove('show');
+
+            // 显示提示
+            showToast('已安全退出系统', 'success');
+
+            // 延迟跳转到登录页
+            setTimeout(() => {
+                mainPage.style.display = 'none';
+                loginPage.style.display = 'flex';
+                
+                // 清空表单
+                loginForm.reset();
+            }, 1000);
+        });
+
+        // 输入框失焦时验证
+        usernameInput.addEventListener('blur', () => {
+            if (usernameInput.value.trim()) {
+                hideFieldError('username');
+            }
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            if (passwordInput.value.trim()) {
+                hideFieldError('password');
+            }
+        });
+
+        // 页面加载时检查Session
+        window.addEventListener('load', () => {
+            const savedUser = sessionStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                loginPage.style.display = 'none';
+                mainPage.style.display = 'block';
+                updateUserInfo();
+            }
+        });
+
+        // 按键快捷键支持
+        document.addEventListener('keydown', (e) => {
+            // Esc关闭对话框
+            if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
+                modalOverlay.classList.remove('show');
+            }
+        });
+
+        // 模拟API日志
+        console.log('🚀 GCT Reporter 登录登出原型已加载');
+        console.log('📋 可用测试账号:');
+        console.log('  - admin / admin123 (管理员)');
+        console.log('  - designer / designer123 (设计者)');
+        console.log('  - viewer / viewer123 (查看者)');
+    </script>
+</body>
+</html>
