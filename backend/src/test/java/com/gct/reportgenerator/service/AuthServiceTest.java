@@ -152,4 +152,16 @@ class AuthServiceTest {
         String token = response.getToken();
         assertTrue(token.matches("TOKEN_\\d+_\\d+"));
     }
+
+    @Test
+    @DisplayName("登出成功 - 记录日志")
+    void logout_Success() {
+        // When - 执行登出操作不应抛出异常
+        assertDoesNotThrow(() -> {
+            authService.logout();
+        });
+        
+        // Then - 验证方法能正常执行
+        // 注意：实际的Session清除和日志记录由方法内部处理
+    }
 }

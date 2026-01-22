@@ -87,9 +87,12 @@ public class AuthController {
     })
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout() {
-        log.info("用户登出");
-        // 暂时简单处理，前端清除token即可
-        // 后续可以加入token黑名单机制
+        log.info("收到登出请求");
+        
+        // 调用服务层处理登出逻辑
+        authService.logout();
+        
+        log.info("登出成功，Session已清除");
         return ResponseEntity.ok(Map.of("message", "登出成功"));
     }
 
