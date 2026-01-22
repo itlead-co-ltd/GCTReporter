@@ -98,6 +98,10 @@ let searchTimer: ReturnType<typeof setTimeout> | null = null
  * 过滤后的用户列表（基于搜索关键字）
  */
 const filteredUsers = computed(() => {
+  if (!users.value || users.value.length === 0) {
+    return []
+  }
+  
   if (!searchKeyword.value) {
     return users.value
   }
@@ -114,7 +118,7 @@ const filteredUsers = computed(() => {
 const loadUsers = async () => {
   loading.value = true
   try {
-    const { data } = await getUsers()
+    const data = await getUsers()
     users.value = data
   } catch (error) {
     console.error('加载用户列表失败:', error)
