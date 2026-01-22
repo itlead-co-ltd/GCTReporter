@@ -61,6 +61,21 @@ public class AuthService {
     }
 
     /**
+     * 用户登出
+     * 
+     * 清除会话信息并记录登出日志
+     * 后续版本将实现Token黑名单机制
+     */
+    public void logout() {
+        // 记录登出操作
+        log.info("用户登出操作执行");
+        
+        // TODO: 后续版本实现Token黑名单机制
+        // 将当前Token加入黑名单，确保Token立即失效
+        // 示例: tokenBlacklistService.addToBlacklist(currentToken);
+    }
+
+    /**
      * 生成Token
      * 
      * @param user 用户对象
