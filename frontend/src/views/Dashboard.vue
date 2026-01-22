@@ -12,6 +12,12 @@
         <h2>🎉 欢迎使用 GCT Reporter</h2>
         <p>这是一个程序员报表生成工具的控制台页面</p>
         <el-divider />
+        <div class="quick-actions">
+          <el-button type="primary" @click="$router.push('/users')">
+            用户管理
+          </el-button>
+        </div>
+        <el-divider />
         <div class="info-grid">
           <div class="info-item">
             <div class="label">用户名</div>
@@ -202,5 +208,12 @@ onMounted(() => {
 
 :deep(.el-divider) {
   margin: 30px 0;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 </style>
