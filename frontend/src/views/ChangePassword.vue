@@ -103,7 +103,7 @@ const form = reactive({
 })
 
 // 验证确认密码
-const validateConfirmPassword = (rule: any, value: any, callback: any) => {
+const validateConfirmPassword = (_rule: any, value: any, callback: any) => {
   if (value === '') {
     callback(new Error('请输入确认密码'))
   } else if (value !== form.newPassword) {

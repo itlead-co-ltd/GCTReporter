@@ -31,21 +31,21 @@ export interface ChangePasswordRequest {
  * @param data 登录表单数据
  */
 export const login = (data: LoginRequest) => {
-  return request.post<LoginResponse>('/api/v1/auth/login', data)
+  return request.post('/api/v1/auth/login', data) as unknown as Promise<LoginResponse>
 }
 
 /**
  * 用户登出
  */
 export const logout = () => {
-  return request.post('/api/v1/auth/logout')
+  return request.post('/api/v1/auth/logout') as unknown as Promise<any>
 }
 
 /**
  * 获取当前用户信息
  */
 export const getCurrentUser = () => {
-  return request.get<UserInfo>('/api/v1/auth/current')
+  return request.get('/api/v1/auth/current') as unknown as Promise<UserInfo>
 }
 
 /**
@@ -53,5 +53,5 @@ export const getCurrentUser = () => {
  * @param data 修改密码请求数据
  */
 export const changePassword = (data: ChangePasswordRequest) => {
-  return request.post('/api/v1/auth/change-password', data)
+  return request.post('/api/v1/auth/change-password', data) as unknown as Promise<any>
 }
