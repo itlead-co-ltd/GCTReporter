@@ -19,6 +19,13 @@ export interface UserInfo {
   enabled: boolean
 }
 
+export interface ChangePasswordRequest {
+  username: string
+  oldPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
 /**
  * 用户登录
  * @param data 登录表单数据
@@ -39,4 +46,12 @@ export const logout = () => {
  */
 export const getCurrentUser = () => {
   return request.get<UserInfo>('/api/v1/auth/current')
+}
+
+/**
+ * 修改密码
+ * @param data 修改密码请求数据
+ */
+export const changePassword = (data: ChangePasswordRequest) => {
+  return request.post('/api/v1/auth/change-password', data)
 }

@@ -4,6 +4,7 @@
       <h1>GCT Reporter 控制台</h1>
       <div class="user-info">
         <span>{{ userInfo.username }} ({{ userInfo.role }})</span>
+        <el-button type="primary" size="small" @click="handleChangePassword">修改密码</el-button>
         <el-button type="danger" size="small" @click="handleLogout">退出登录</el-button>
       </div>
     </div>
@@ -96,6 +97,10 @@ const handleLogout = async () => {
   } catch (error) {
     // 用户取消或其他错误
   }
+}
+
+const handleChangePassword = () => {
+  router.push('/change-password')
 }
 
 onMounted(() => {

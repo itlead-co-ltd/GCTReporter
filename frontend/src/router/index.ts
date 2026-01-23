@@ -24,6 +24,15 @@ const router = createRouter({
         title: '控制台',
         requiresAuth: true
       }
+    },
+    {
+      path: '/change-password',
+      name: 'ChangePassword',
+      component: () => import('@/views/ChangePassword.vue'),
+      meta: {
+        title: '修改密码',
+        requiresAuth: true
+      }
     }
   ]
 })

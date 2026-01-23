@@ -152,4 +152,99 @@ class AuthServiceTest {
         String token = response.getToken();
         assertTrue(token.matches("TOKEN_\\d+_\\d+"));
     }
+
+    @Test
+    @DisplayName("修改密码成功 - 正确的旧密码和新密码")
+    void changePassword_Success() {
+        // Given
+        com.gct.reportgenerator.dto.ChangePasswordRequest request = 
+            com.gct.reportgenerator.dto.ChangePasswordRequest.builder()
+                .username("admin")
+                .oldPassword("admin123")
+                .newPassword("newpass123")
+                .confirmPassword("newpass123")
+                .build();
+
+        when(userRepository.findByUsernameAndEnabled("admin", true))
+                .thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches("admin123", testUser.getPassword()))
+                .thenReturn(true);
+        when(passwordEncoder.encode("newpass123"))
+                .thenReturn("$2a$10$encoded_new_password");
+
+        // When
+        authService.changePassword(request);
+
+        // Then
+        org.mockito.Mockito.verify(userRepository).save(testUser);
+        assertEquals("$2a$10$encoded_new_password", testUser.getPassword());
+    }
+
+    @Test
+    @DisplayName("修改密码失败 - 新密码和确认密码不一致")
+    void changePassword_PasswordMismatch() {
+        // Given
+        com.gct.reportgenerator.dto.ChangePasswordRequest request = 
+            com.gct.reportgenerator.dto.ChangePasswordRequest.builder()
+                .username("admin")
+                .oldPassword("admin123")
+                .newPassword("newpass123")
+                .confirmPassword("different123")
+                .build();
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            authService.changePassword(request);
+        });
+
+        assertEquals("新密码和确认密码不一致", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("修改密码失败 - 用户不存在")
+    void changePassword_UserNotFound() {
+        // Given
+        com.gct.reportgenerator.dto.ChangePasswordRequest request = 
+            com.gct.reportgenerator.dto.ChangePasswordRequest.builder()
+                .username("nonexistent")
+                .oldPassword("oldpass123")
+                .newPassword("newpass123")
+                .confirmPassword("newpass123")
+                .build();
+
+        when(userRepository.findByUsernameAndEnabled(anyString(), anyBoolean()))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            authService.changePassword(request);
+        });
+
+        assertEquals("用户不存在或已禁用", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("修改密码失败 - 旧密码错误")
+    void changePassword_WrongOldPassword() {
+        // Given
+        com.gct.reportgenerator.dto.ChangePasswordRequest request = 
+            com.gct.reportgenerator.dto.ChangePasswordRequest.builder()
+                .username("admin")
+                .oldPassword("wrongoldpass")
+                .newPassword("newpass123")
+                .confirmPassword("newpass123")
+                .build();
+
+        when(userRepository.findByUsernameAndEnabled("admin", true))
+                .thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches("wrongoldpass", testUser.getPassword()))
+                .thenReturn(false);
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            authService.changePassword(request);
+        });
+
+        assertEquals("旧密码错误", exception.getMessage());
+    }
 }
