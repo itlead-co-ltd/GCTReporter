@@ -24,12 +24,21 @@ const router = createRouter({
         title: '控制台',
         requiresAuth: true
       }
+    },
+    {
+      path: '/change-password',
+      name: 'ChangePassword',
+      component: () => import('@/views/ChangePassword.vue'),
+      meta: {
+        title: '修改密码',
+        requiresAuth: true
+      }
     }
   ]
 })
 
 // 路由守卫：检查登录状态
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem('token')
   
   // 设置页面标题

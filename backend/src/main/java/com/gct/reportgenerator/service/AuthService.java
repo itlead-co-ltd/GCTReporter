@@ -1,5 +1,6 @@
 package com.gct.reportgenerator.service;
 
+import com.gct.reportgenerator.dto.ChangePasswordRequest;
 import com.gct.reportgenerator.dto.LoginRequest;
 import com.gct.reportgenerator.dto.LoginResponse;
 import com.gct.reportgenerator.entity.User;
@@ -58,6 +59,41 @@ public class AuthService {
                 .role(user.getRole().name())
                 .userId(user.getId())
                 .build();
+    }
+
+    /**
+     * 修改密码
+     * 
+     * @param request 修改密码请求
+     * @throws BusinessException 修改密码失败时抛出
+     */
+    public void changePassword(ChangePasswordRequest request) {
+        log.info("用户修改密码尝试, username: {}", request.getUsername());
+
+        // 验证新密码和确认密码是否一致
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            log.warn("修改密码失败: 新密码和确认密码不一致, username: {}", request.getUsername());
+            throw new BusinessException("新密码和确认密码不一致");
+        }
+
+        // 查找用户
+        User user = userRepository.findByUsernameAndEnabled(request.getUsername(), true)
+                .orElseThrow(() -> {
+                    log.warn("修改密码失败: 用户不存在或已禁用, username: {}", request.getUsername());
+                    return new BusinessException("用户不存在或已禁用");
+                });
+
+        // 验证旧密码
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            log.warn("修改密码失败: 旧密码错误, username: {}", request.getUsername());
+            throw new BusinessException("旧密码错误");
+        }
+
+        // 加密并保存新密码
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        log.info("修改密码成功, username: {}", request.getUsername());
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.gct.reportgenerator.controller;
 
+import com.gct.reportgenerator.dto.ChangePasswordRequest;
 import com.gct.reportgenerator.dto.LoginRequest;
 import com.gct.reportgenerator.dto.LoginResponse;
 import com.gct.reportgenerator.service.AuthService;
@@ -123,5 +124,39 @@ public class AuthController {
         userInfo.put("enabled", true);
         
         return ResponseEntity.ok(userInfo);
+    }
+
+    /**
+     * 修改密码
+     * 
+     * @param request 修改密码请求
+     * @return 修改成功响应
+     */
+    @Operation(
+        summary = "修改密码", 
+        description = "用户修改自己的密码，需要提供旧密码验证"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "修改成功"
+        ),
+        @ApiResponse(
+            responseCode = "400", 
+            description = "旧密码错误或新密码不符合要求"
+        ),
+        @ApiResponse(
+            responseCode = "401", 
+            description = "用户不存在或已禁用"
+        )
+    })
+    @PostMapping("/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(
+        @Parameter(description = "修改密码请求信息", required = true)
+        @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        log.info("收到修改密码请求, username: {}", request.getUsername());
+        authService.changePassword(request);
+        return ResponseEntity.ok(Map.of("message", "密码修改成功"));
     }
 }
