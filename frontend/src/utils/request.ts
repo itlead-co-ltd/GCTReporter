@@ -30,7 +30,8 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response: AxiosResponse) => {
-    return response.data
+    // 直接返回response.data，让TypeScript推断类型
+    return response.data as any
   },
   (error) => {
     if (error.response) {
