@@ -23,20 +23,20 @@ export interface UserInfo {
  * 用户登录
  * @param data 登录表单数据
  */
-export const login = (data: LoginRequest) => {
-  return request.post<LoginResponse>('/api/v1/auth/login', data)
+export const login = (data: LoginRequest): Promise<LoginResponse> => {
+  return request.post('/api/v1/auth/login', data)
 }
 
 /**
  * 用户登出
  */
-export const logout = () => {
+export const logout = (): Promise<any> => {
   return request.post('/api/v1/auth/logout')
 }
 
 /**
  * 获取当前用户信息
  */
-export const getCurrentUser = () => {
-  return request.get<UserInfo>('/api/v1/auth/current')
+export const getCurrentUser = (): Promise<UserInfo> => {
+  return request.get('/api/v1/auth/current')
 }
