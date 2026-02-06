@@ -146,13 +146,13 @@ const handleLogin = async () => {
       password: loginForm.password
     })
 
-    ElMessage.success(`Access granted: Welcome ${response.username}!`)
+    ElMessage.success(`Access granted: Welcome ${response.data.username}!`)
     
     // 保存token和用户信息
-    localStorage.setItem('token', response.token)
-    localStorage.setItem('username', response.username)
-    localStorage.setItem('role', response.role)
-    localStorage.setItem('userId', response.userId.toString())
+    localStorage.setItem('token', response.data.token)
+    localStorage.setItem('username', response.data.username)
+    localStorage.setItem('role', response.data.role)
+    localStorage.setItem('userId', response.data.userId.toString())
     
     // 跳转到首页
     setTimeout(() => {

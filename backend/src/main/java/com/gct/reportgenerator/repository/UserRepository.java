@@ -4,6 +4,7 @@ import com.gct.reportgenerator.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -39,4 +40,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return 是否存在
      */
     boolean existsByUsername(String username);
+
+    /**
+     * 根据用户名模糊搜索（不区分大小写）
+     * 
+     * @param username 用户名关键字
+     * @return 用户列表
+     */
+    List<User> findByUsernameContainingIgnoreCase(String username);
 }
