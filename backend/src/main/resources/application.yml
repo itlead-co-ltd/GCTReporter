@@ -24,6 +24,12 @@ server:
   port: 8080
   servlet:
     context-path: /
+    session:
+      timeout: 30m              # Session超时30分钟
+      cookie:
+        http-only: true         # 防止XSS攻击
+        secure: false           # 开发环境使用HTTP，生产环境应设为true
+        same-site: strict       # 防止CSRF攻击
 
 # SpringDoc OpenAPI 配置
 springdoc:

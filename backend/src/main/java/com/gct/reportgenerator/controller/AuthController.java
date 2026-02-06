@@ -2,7 +2,9 @@ package com.gct.reportgenerator.controller;
 
 import com.gct.reportgenerator.dto.LoginRequest;
 import com.gct.reportgenerator.dto.LoginResponse;
+import com.gct.reportgenerator.dto.UserSession;
 import com.gct.reportgenerator.service.AuthService;
+import com.gct.reportgenerator.service.SessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final SessionService sessionService;
 
     /**
      * 用户登录
@@ -63,10 +67,20 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
         @Parameter(description = "登录请求信息", required = true)
-        @Valid @RequestBody LoginRequest request
+        @Valid @RequestBody LoginRequest request,
+        HttpServletRequest httpRequest
     ) {
         log.info("收到登录请求, username: {}", request.getUsername());
         LoginResponse response = authService.login(request);
+        
+        // 保存用户会话信息
+        UserSession userSession = UserSession.builder()
+                .userId(response.getUserId())
+                .username(response.getUsername())
+                .role(response.getRole())
+                .build();
+        sessionService.saveSession(httpRequest, userSession);
+        
         return ResponseEntity.ok(response);
     }
 
@@ -86,10 +100,10 @@ public class AuthController {
         )
     })
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, String>> logout() {
+    public ResponseEntity<Map<String, String>> logout(HttpServletRequest request) {
         log.info("用户登出");
-        // 暂时简单处理，前端清除token即可
-        // 后续可以加入token黑名单机制
+        // 清除Session
+        sessionService.removeSession(request);
         return ResponseEntity.ok(Map.of("message", "登出成功"));
     }
 
@@ -113,13 +127,14 @@ public class AuthController {
         )
     })
     @GetMapping("/current")
-    public ResponseEntity<Map<String, Object>> getCurrentUser() {
-        // TODO: 从token中解析用户信息
-        // 暂时返回mock数据
+    public ResponseEntity<Map<String, Object>> getCurrentUser(HttpServletRequest request) {
+        // 从Session中获取用户信息
+        UserSession userSession = sessionService.getSession(request);
+        
         Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("id", 1);
-        userInfo.put("username", "admin");
-        userInfo.put("role", "ADMIN");
+        userInfo.put("id", userSession.getUserId());
+        userInfo.put("username", userSession.getUsername());
+        userInfo.put("role", userSession.getRole());
         userInfo.put("enabled", true);
         
         return ResponseEntity.ok(userInfo);
